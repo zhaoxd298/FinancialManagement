@@ -32,8 +32,8 @@ HEADERS  += \
     SearchCustomerDialog.h \
     OrderInformation.h \
     SearchOrderDialog.h \
-    UserAccount.h \
     CustomerInformation.h \
     CustomerInfoDialog.h \
     OrderDialog.h \
-    SqlDatabase.h
+    SqlDatabase.h \
+    Version.h

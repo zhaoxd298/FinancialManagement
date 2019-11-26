@@ -64,6 +64,8 @@ public:
     bool getOrderInfoByOrderID(const QString& orderID, QList<OrderInformation>& orderInfoList);
     bool getOrderInfoByDateRange(const QString& startDate, const QString& endDate, QList<OrderInformation>& orderInfoList);
     bool getOrderInfoBySalesman(const QString& salesman, QList<OrderInformation>& orderInfoList);
+    bool getOrderInfoByCustomerName(const QString& name, QList<OrderInformation>& orderInfoList);
+    bool getOrderInfoByStatus(const QString& status, QList<OrderInformation>& orderInfoList);
 
     bool deleteCustomerInfo(const QString& name);
     bool deleteOrderInfo(const QString& orderID);

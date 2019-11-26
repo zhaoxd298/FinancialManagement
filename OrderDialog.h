@@ -24,7 +24,7 @@ private:
     QLineEdit* m_customerNameEdit;				// 客户
     QComboBox* m_orderStatusCbx;				// 订单状态
     QDateTimeEdit* m_payTimeEdit;				// 付款时间
-    QLineEdit* m_payTypeEdit;					// 付款方式
+    QComboBox* m_payTypeCbx;					// 付款方式
     QLineEdit* m_realIncomeEdit;                // 实收
     QLineEdit* m_handlingFeeEdit;				// 平台手续费
     QLineEdit* m_freightCustomerEdit;			// 运费(客户)

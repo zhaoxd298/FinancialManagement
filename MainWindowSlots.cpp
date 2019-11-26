@@ -166,10 +166,16 @@ void MainWindow::onSearchOrderBtn()
 
         int searchType = dialog.getSearchType();
         switch (searchType) {
-        case 0:
+        case SEARCH_ALL_ORDER:     // 所有订单
             ret = m_sqlDatabase->getAllOrderInfo(list);
             break;
-        case 1:
+        case SEARCH_BY_UNPAY_PROFIT:
+            ret = m_sqlDatabase->getOrderInfoByStatus("未结算", list);
+            break;
+        case SEARCH_BY_PAYED_PROFIT:
+            ret = m_sqlDatabase->getOrderInfoByStatus("已结算", list);
+            break;
+        case SEARCH_BY_LAST_MONTH_ORDER:
             curDate = QDate::currentDate();
             curDate = curDate.addMonths(-1);
             startDate = QDate(curDate.year(), curDate.month(),1).toString("yyyy-MM-dd");
@@ -177,19 +183,24 @@ void MainWindow::onSearchOrderBtn()
 
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case 2:
+        case SEARCH_BY_DATE_RANGE:
             startDate = dialog.getStartDate();
             endDate = dialog.getEndDate();
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case 3:
+        case SEARCH_BY_SALESMAN:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoBySalesman(keyword, list);
             break;
-        case 4:
+        case SEARCH_BY_ORDERID:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoByOrderID(keyword, list);
             break;
+        case SEARCH_BY_CUSTOMER_NAME:
+            keyword = dialog.getKeyWord();
+            ret = m_sqlDatabase->getOrderInfoByCustomerName(keyword, list);
+            break;
+
         default:
             ret = false;
             break;

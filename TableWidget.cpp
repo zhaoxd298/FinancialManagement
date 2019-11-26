@@ -22,11 +22,6 @@ TableWidget::TableWidget()
     m_validRowCnt = 0;
     setRowCount(DEFAULT_ROW_CNT);
 
-    m_orderList.append(false);
-    for (int i=1; i<11; i++) {
-        m_orderList.append(true);
-    }
-
     createActions();
 
     setDataTypeCustomerInfo();
@@ -63,6 +58,16 @@ void TableWidget::setDataTypeCustomerInfo()
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
+    for (int i=0; i<m_header.size(); i++)
+    {
+        setColumnWidth(i, 80);
+    }
+
+    m_orderList.clear();
+    m_orderList.append(false);
+    for (int i=1; i<m_header.size(); i++) {
+        m_orderList.append(true);
+    }
 
     if (NULL != mainMenu)
     {
@@ -93,13 +98,21 @@ void TableWidget::setDataTypeOrderInfo()
 
     m_header.clear();
     m_header << "订单编号" << "客户" << "订单状态" << "品名" << "单价"
-           << "成本单价" << "数量" << "付款时间" << "付款方式" << "实收金额"
+           << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
            << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "包装费" << "平台手续费" << "总支出" << "总利润"
            << "合伙人利润" << "备注";
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
+
+    setColumnWidth(0, 60);
+    setColumnWidth(1, 100);
+    setColumnWidth(2, 80);
+    for (int i=3; i<m_header.size(); i++)
+    {
+        setColumnWidth(i, 60);
+    }
 
     if (NULL != mainMenu)
     {
@@ -130,10 +143,16 @@ void TableWidget::setDataTypeProductInfo()
     m_dataType = DATA_IS_PRODUCT_INFO;
 
     m_header.clear();
-    m_header << "商品名称" << "单价" << "成本单价" << "数量";
+    m_header << "商品名称" << "单价" << "成本单价" << "数量" << "规格";
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
+
+    setColumnWidth(0, 80);
+    setColumnWidth(1, 60);
+    setColumnWidth(2, 60);
+    setColumnWidth(3, 60);
+    setColumnWidth(4, 80);
 
     if (NULL != mainMenu)
     {
@@ -143,7 +162,7 @@ void TableWidget::setDataTypeProductInfo()
         mainMenu->addAction(m_deleteAction);
     }
 
-    setEditTriggers(QAbstractItemView::DoubleClicked);
+    setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
 void TableWidget::setTableHeader(const QStringList& header)
@@ -220,20 +239,21 @@ void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
     setCellData(m_validRowCnt, 4, QString::number(orderInfo.productList[0].price));
     setCellData(m_validRowCnt, 5, QString::number(orderInfo.productList[0].costPrice));
     setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[0].count));
-    setCellData(m_validRowCnt, 7, orderInfo.payTime);
-    setCellData(m_validRowCnt, 8, orderInfo.payType);
-    setCellData(m_validRowCnt, 9, QString::number(orderInfo.realIncome));
-    setCellData(m_validRowCnt, 10, QString::number(orderInfo.shouldIncome));
-    setCellData(m_validRowCnt, 11, QString::number(orderInfo.freightCustomer));
-    setCellData(m_validRowCnt, 12, QString::number(orderInfo.freightFactoryToUs));
-    setCellData(m_validRowCnt, 13, QString::number(orderInfo.freightUsToForwarding));
-    setCellData(m_validRowCnt, 14, QString::number(orderInfo.freightForeign));
-    setCellData(m_validRowCnt, 15, QString::number(orderInfo.packageFee));
-    setCellData(m_validRowCnt, 16, QString::number(orderInfo.handlingFee));
-    setCellData(m_validRowCnt, 17, QString::number(orderInfo.tatolExpenses));
-    setCellData(m_validRowCnt, 18, QString::number(orderInfo.totalProfit));
-    setCellData(m_validRowCnt, 19, QString::number(orderInfo.partnerProfit));
-    setCellData(m_validRowCnt, 20, orderInfo.remarks);
+    setCellData(m_validRowCnt, 7, orderInfo.productList[0].spec);
+    setCellData(m_validRowCnt, 8, orderInfo.payTime);
+    setCellData(m_validRowCnt, 9, orderInfo.payType);
+    setCellData(m_validRowCnt, 10, QString::number(orderInfo.realIncome));
+    setCellData(m_validRowCnt, 11, QString::number(orderInfo.shouldIncome));
+    setCellData(m_validRowCnt, 12, QString::number(orderInfo.freightCustomer));
+    setCellData(m_validRowCnt, 13, QString::number(orderInfo.freightFactoryToUs));
+    setCellData(m_validRowCnt, 14, QString::number(orderInfo.freightUsToForwarding));
+    setCellData(m_validRowCnt, 15, QString::number(orderInfo.freightForeign));
+    setCellData(m_validRowCnt, 16, QString::number(orderInfo.packageFee));
+    setCellData(m_validRowCnt, 17, QString::number(orderInfo.handlingFee));
+    setCellData(m_validRowCnt, 18, QString::number(orderInfo.tatolExpenses));
+    setCellData(m_validRowCnt, 19, QString::number(orderInfo.totalProfit));
+    setCellData(m_validRowCnt, 20, QString::number(orderInfo.partnerProfit));
+    setCellData(m_validRowCnt, 21, orderInfo.remarks);
 
     m_validRowCnt++;
     for (int i=1; i<orderInfo.productList.size(); i++)
@@ -242,6 +262,7 @@ void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
         setCellData(m_validRowCnt, 4, QString::number(orderInfo.productList[i].price));
         setCellData(m_validRowCnt, 5, QString::number(orderInfo.productList[i].costPrice));
         setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[i].count));
+        setCellData(m_validRowCnt, 7, orderInfo.productList[i].spec);
         m_validRowCnt++;
     }
 
@@ -253,7 +274,7 @@ void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
             setSpan(startRowCnt, i, productCnt, 1);
         }
 
-        for (int i=7; i<m_validClumnCnt; i++)
+        for (int i=8; i<m_validClumnCnt; i++)
         {
             setSpan(startRowCnt, i, productCnt, 1);
         }
@@ -273,6 +294,7 @@ void TableWidget::addProductInfo(const ProductInfo& productInfo)
     setCellData(m_validRowCnt, 1, QString::number(productInfo.price));
     setCellData(m_validRowCnt, 2, QString::number(productInfo.costPrice));
     setCellData(m_validRowCnt, 3, QString::number(productInfo.count));
+    setCellData(m_validRowCnt, 4, productInfo.spec);
 
     setItemData(m_validRowCnt, 0, productInfo.number);
 
@@ -294,20 +316,21 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
     setCellData(row, 4, QString::number(orderInfo.productList[0].price));
     setCellData(row, 5, QString::number(orderInfo.productList[0].costPrice));
     setCellData(row, 6, QString::number(orderInfo.productList[0].count));
-    setCellData(row, 7, orderInfo.payTime);
-    setCellData(row, 8, orderInfo.payType);
-    setCellData(row, 9, QString::number(orderInfo.realIncome));
-    setCellData(row, 10, QString::number(orderInfo.shouldIncome));
-    setCellData(row, 11, QString::number(orderInfo.freightCustomer));
-    setCellData(row, 12, QString::number(orderInfo.freightFactoryToUs));
-    setCellData(row, 13, QString::number(orderInfo.freightUsToForwarding));
-    setCellData(row, 14, QString::number(orderInfo.freightForeign));
-    setCellData(row, 15, QString::number(orderInfo.packageFee));
-    setCellData(row, 16, QString::number(orderInfo.handlingFee));
-    setCellData(row, 17, QString::number(orderInfo.tatolExpenses));
-    setCellData(row, 18, QString::number(orderInfo.totalProfit));
-    setCellData(row, 19, QString::number(orderInfo.partnerProfit));
-    setCellData(row, 20, orderInfo.remarks);
+    setCellData(row, 7, orderInfo.productList[0].spec);
+    setCellData(row, 8, orderInfo.payTime);
+    setCellData(row, 9, orderInfo.payType);
+    setCellData(row, 10, QString::number(orderInfo.realIncome));
+    setCellData(row, 11, QString::number(orderInfo.shouldIncome));
+    setCellData(row, 12, QString::number(orderInfo.freightCustomer));
+    setCellData(row, 13, QString::number(orderInfo.freightFactoryToUs));
+    setCellData(row, 14, QString::number(orderInfo.freightUsToForwarding));
+    setCellData(row, 15, QString::number(orderInfo.freightForeign));
+    setCellData(row, 16, QString::number(orderInfo.packageFee));
+    setCellData(row, 17, QString::number(orderInfo.handlingFee));
+    setCellData(row, 18, QString::number(orderInfo.tatolExpenses));
+    setCellData(row, 19, QString::number(orderInfo.totalProfit));
+    setCellData(row, 20, QString::number(orderInfo.partnerProfit));
+    setCellData(row, 21, orderInfo.remarks);
 
     for (int i=1; i<orderInfo.productList.size(); i++)
     {
@@ -315,6 +338,7 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
         setCellData(row+i, 4, QString::number(orderInfo.productList[i].price));
         setCellData(row+i, 5, QString::number(orderInfo.productList[i].costPrice));
         setCellData(row+i, 6, QString::number(orderInfo.productList[i].count));
+        setCellData(row+i, 7, orderInfo.productList[i].spec);
     }
 }
 
@@ -334,6 +358,7 @@ QList<ProductInfo> TableWidget::getProductList()
             product.price = itemText(i, 1).toDouble(&priceOk);
             product.costPrice = itemText(i, 2).toDouble(&costPriceOk);
             product.count = itemText(i, 3).toLong(&countOk);
+            product.spec = itemText(i, 4);
 
             if (product.productName.isEmpty() ||
                 false == priceOk ||

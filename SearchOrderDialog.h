@@ -9,6 +9,15 @@
 #include <QGridLayout>
 #include <QDialog>
 
+#define SEARCH_ALL_ORDER              0
+#define SEARCH_BY_UNPAY_PROFIT        1
+#define SEARCH_BY_PAYED_PROFIT        2
+#define SEARCH_BY_LAST_MONTH_ORDER    3
+#define SEARCH_BY_DATE_RANGE          4
+#define SEARCH_BY_SALESMAN            5
+#define SEARCH_BY_ORDERID             6
+#define SEARCH_BY_CUSTOMER_NAME       7
+
 class SearchOrderDialog : public QDialog
 {
     Q_OBJECT

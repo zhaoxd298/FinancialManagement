@@ -11,6 +11,7 @@ struct ProductInfo
     QString productName;         // 商品名称
     double price;                // 单价
     double costPrice;            // 成本单价
+    QString spec;                // 产品规格
     int count;                   // 数量
     double curProfit;            // 利润
     double totalIncome;          // 总收如

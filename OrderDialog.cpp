@@ -32,9 +32,9 @@ void OrderDialog::constructUI()
 
     QLabel* orderStatusLabel = new QLabel(tr("订单状态："));
     m_orderStatusCbx = new QComboBox;
-    QStringList item;
-    item << "已付定金" << "已付全款" << "待发货" << "已发货" << "已结算利润";
-    m_orderStatusCbx->addItems(item);
+    QStringList items;
+    items << "已付定金" << "已付全款" << "待发货" << "已发货" << "未结算利润" << "已结算利润";
+    m_orderStatusCbx->addItems(items);
     gridLayout->addWidget(orderStatusLabel, 2, 0, 1, 1);
     gridLayout->addWidget(m_orderStatusCbx, 2, 1, 1, 2);
 
@@ -46,9 +46,12 @@ void OrderDialog::constructUI()
     gridLayout->addWidget(m_payTimeEdit, 3, 1, 1, 2);
 
     QLabel* payTypeLabel = new QLabel(tr("付款方式："));
-    m_payTypeEdit = new QLineEdit;
+    m_payTypeCbx = new QComboBox;
+    items.clear();
+    items << "信保" << "微信" << "支付宝" << "大陆美金账户" << "香港账户" << "西联汇款" << "Paypol" << "其他";
+    m_payTypeCbx->addItems(items);
     gridLayout->addWidget(payTypeLabel, 4, 0, 1, 1);
-    gridLayout->addWidget(m_payTypeEdit, 4, 1, 1, 2);
+    gridLayout->addWidget(m_payTypeCbx, 4, 1, 1, 2);
 
     QLabel* realIncomeLabel = new QLabel(tr("实收："));
     m_realIncomeEdit = new QLineEdit;
@@ -109,7 +112,7 @@ void OrderDialog::constructUI()
     gridLayout->addWidget(m_cancelBtn, 14, 4, 1, 1);
 
     setWindowTitle(tr("新增订单"));
-    this->setMinimumWidth(480);
+    this->setMinimumWidth(420);
     //this->setFixedHeight(280);
 }
 
@@ -134,7 +137,7 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
     {
         m_payTimeEdit->setEnabled(false);
     }
-    m_payTypeEdit->setText(orderInfo.payType);
+    m_payTypeCbx->setCurrentText(orderInfo.payType);
     m_realIncomeEdit->setText(QString::number(orderInfo.realIncome));
     m_handlingFeeEdit->setText(QString::number(orderInfo.handlingFee));
     m_freightCustomerEdit->setText(QString::number(orderInfo.freightCustomer));
@@ -160,7 +163,7 @@ void OrderDialog::onOKBtn()
     orderInfo.customerName = m_customerNameEdit->text();
     orderInfo.orderStatus = m_orderStatusCbx->currentText();
     orderInfo.payTime = m_payTimeEdit->text();      // ???
-    orderInfo.payType = m_payTypeEdit->text();
+    orderInfo.payType = m_payTypeCbx->currentText();
     orderInfo.realIncome = m_realIncomeEdit->text().toDouble();
     orderInfo.handlingFee = m_handlingFeeEdit->text().toDouble();
     orderInfo.freightCustomer = m_freightCustomerEdit->text().toDouble();

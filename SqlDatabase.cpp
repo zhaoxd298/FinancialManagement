@@ -96,7 +96,8 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "productName varchar,"
                                   "price DOUBLE,"
                                   "costPrice DOUBLE,"
-                                  "count INT)").arg(PRODUCT_TABLE);
+                                  "count INT,"
+                                  "spec varchar)").arg(PRODUCT_TABLE);
         m_productQueryIsOK = m_productQuery->exec(cmd);
         m_errorStr = m_productQuery->lastError().text();
         qDebug() << m_errorStr;
@@ -576,7 +577,6 @@ bool SqlDatabase::getAllOrderInfo(QList<OrderInformation>& orderInfoList)
 
     for (int i=0; i<orderInfoList.size(); i++)
     {
-
         if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
         {
             m_errorStr = "Get product list error";
@@ -694,7 +694,82 @@ bool SqlDatabase::getOrderInfoBySalesman(const QString& salesman, QList<OrderInf
 
     for (int i=0; i<orderInfoList.size(); i++)
     {
-        qDebug() << orderInfoList[i].orderID;
+        if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
+        {
+            m_errorStr = "Get product list error";
+            ret = false;
+        }
+
+        //orderInfoList[i].calProfitIncomeAndExpenses();
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getOrderInfoByCustomerName(const QString& name, QList<OrderInformation>& orderInfoList)
+{
+    bool ret = false;
+
+    if (!m_orderQueryIsOK) {
+        return ret;
+    }
+
+    orderInfoList.clear();
+
+    QString cmd = QString("select * from %1 where customerName like '%%2%'").arg(ORDER_TABLE).arg(name);
+    ret = m_orderQuery->exec(cmd);
+    m_errorStr = m_orderQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getOrderInfoList(m_orderQuery, orderInfoList);
+
+        if (orderInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    for (int i=0; i<orderInfoList.size(); i++)
+    {
+        if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
+        {
+            m_errorStr = "Get product list error";
+            ret = false;
+        }
+
+        //orderInfoList[i].calProfitIncomeAndExpenses();
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getOrderInfoByStatus(const QString& status, QList<OrderInformation>& orderInfoList)
+{
+    bool ret = false;
+
+    if (!m_orderQueryIsOK) {
+        return ret;
+    }
+
+    orderInfoList.clear();
+
+    QString cmd = QString("select * from %1 where orderStatus like '%%2%'").arg(ORDER_TABLE).arg(status);
+    ret = m_orderQuery->exec(cmd);
+    m_errorStr = m_orderQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getOrderInfoList(m_orderQuery, orderInfoList);
+
+        if (orderInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    for (int i=0; i<orderInfoList.size(); i++)
+    {
         if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
         {
             m_errorStr = "Get product list error";
@@ -733,8 +808,8 @@ bool SqlDatabase::insertProductInfo(const QString& orderID, const ProductInfo& p
         return ret;
     }
 
-    QString cmd = QString("insert into %1 (orderID,productName,price,costPrice,count) "
-                          "VALUES('%2', '%3', %4, %5, %6)").arg(PRODUCT_TABLE).arg(orderID).arg(productInfo.productName).arg(productInfo.price).arg(productInfo.costPrice).arg(productInfo.count);
+    QString cmd = QString("insert into %1 (orderID,productName,price,costPrice,count,spec) "
+                          "VALUES('%2', '%3', %4, %5, %6, '%7')").arg(PRODUCT_TABLE).arg(orderID).arg(productInfo.productName).arg(productInfo.price).arg(productInfo.costPrice).arg(productInfo.count).arg(productInfo.spec);
     ret = m_productQuery->exec(cmd);
     if(!ret)
     {
@@ -762,7 +837,8 @@ bool SqlDatabase::updateProductInfo(const ProductInfo& productInfo)
                               "productName = :productName,"
                               "price = :price,"
                               "costPrice = :costPrice,"
-                              "count = :count "
+                              "count = :count,"
+                              "spec = :spec "
                               "where number = :number").arg(PRODUCT_TABLE);
         m_productQuery->prepare(cmd);
 
@@ -770,6 +846,7 @@ bool SqlDatabase::updateProductInfo(const ProductInfo& productInfo)
         m_productQuery->bindValue(":price", productInfo.price);
         m_productQuery->bindValue(":costPrice", productInfo.costPrice);
         m_productQuery->bindValue(":count", productInfo.count);
+        m_productQuery->bindValue(":spec", productInfo.spec);
         m_productQuery->bindValue(":number", productInfo.number);
 
         ret = m_productQuery->exec();
@@ -810,6 +887,7 @@ bool SqlDatabase::getProductInfoByOrderID(const QString& orderID, QList<ProductI
         info.price = m_productQuery->value(3).toDouble(&ret);
         info.costPrice = m_productQuery->value(4).toDouble(&ret);
         info.count = m_productQuery->value(5).toInt(&ret);
+        info.spec = m_productQuery->value(6).toString();
 
         productInfoList.append(info);
     }

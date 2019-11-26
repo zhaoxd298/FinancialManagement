@@ -22,7 +22,7 @@ void SearchOrderDialog::constructUI()
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-    items << "所有订单" << "上一月订单" << "指定日期" << "按业务员" << "按订单号";
+    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按订单号" << "按客户名";
     m_searchTypeCBox->addItems(items);
 
     m_kerWordLabel = new QLabel(tr("关键字："));
@@ -92,13 +92,15 @@ void SearchOrderDialog::onOkBtn()
     bool ret = true;
     m_searchType = m_searchTypeCBox->currentIndex();
 
-    if (2 == m_searchType)
+    if (SEARCH_BY_DATE_RANGE == m_searchType)
     {
         m_startDate = m_startDataEdit->text();
         m_endDate = m_endDataEdit->text();
         ret = true;
     }
-    else if ((3==m_searchType) || (4==m_searchType))
+    else if ((SEARCH_BY_SALESMAN==m_searchType) ||
+             (SEARCH_BY_ORDERID ==m_searchType) ||
+             (SEARCH_BY_CUSTOMER_NAME ==m_searchType))
     {
         m_keyWord = m_keyWordEdit->text();
         if (m_keyWord.isEmpty())
@@ -121,7 +123,7 @@ void SearchOrderDialog::onOkBtn()
 
 void SearchOrderDialog::onCbxIndexChanged(int index)
 {
-    if (2 == m_lastCbxIndex)
+    if (SEARCH_BY_DATE_RANGE == m_lastCbxIndex)
     {
         m_gridLayout->removeWidget(m_dateRangeLabel);
         m_gridLayout->removeWidget(m_startDataEdit);
@@ -132,7 +134,9 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_connectLabel->setParent(NULL);
         m_endDataEdit->setParent(NULL);
     }
-    else if ((3 == m_lastCbxIndex) || (4 == m_lastCbxIndex))
+    else if ((SEARCH_BY_SALESMAN == m_lastCbxIndex) ||
+             (SEARCH_BY_ORDERID == m_lastCbxIndex) ||
+             (SEARCH_BY_CUSTOMER_NAME == m_lastCbxIndex))
     {
         m_gridLayout->removeWidget(m_kerWordLabel);
         m_gridLayout->removeWidget(m_keyWordEdit);
@@ -140,22 +144,28 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_keyWordEdit->setParent(NULL);
     }
 
-    if (2 == index)
+    if (SEARCH_BY_DATE_RANGE == index)
     {
         m_gridLayout->addWidget(m_dateRangeLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_startDataEdit, 1, 1, 1, 2);
         m_gridLayout->addWidget(m_connectLabel, 1, 3, 1, 1);
         m_gridLayout->addWidget(m_endDataEdit, 1, 4, 1, 2);
     }
-    else if (3 == index)
+    else if (SEARCH_BY_SALESMAN == index)
     {
         m_kerWordLabel->setText(tr("业务员："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
-    else if (4 == index)
+    else if (SEARCH_BY_ORDERID == index)
     {
         m_kerWordLabel->setText(tr("订单号："));
+        m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
+        m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
+    }
+    else if (SEARCH_BY_CUSTOMER_NAME == index)
+    {
+        m_kerWordLabel->setText(tr("客户名："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
