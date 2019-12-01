@@ -54,7 +54,7 @@ void TableWidget::setDataTypeCustomerInfo()
 
     m_header.clear();
     m_header << "姓名" << "客户等级" <<  "客户状态" <<  "登记日期" << "询盘来源" << "背景" << "地址"
-           << "公司名" << "邮箱" << "联系方式" << "职位" << "跟进情况" << "业务员" << "备注";
+           << "公司名" << "网址" << "邮箱" << "联系方式" << "职位" << "跟进情况" << "业务员" << "备注";
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
@@ -74,14 +74,19 @@ void TableWidget::setDataTypeCustomerInfo()
         mainMenu->clear(); //清除原有菜单
         mainMenu->addSeparator();
 
-        m_editAction->setText(tr("编辑当前客户信息"));
+        m_editAction->setText(tr("编辑"));
         mainMenu->addAction(m_editAction);
 
-        m_deleteAction->setText(tr("删除当前客户信息"));
+        m_deleteAction->setText(tr("删除"));
         mainMenu->addAction(m_deleteAction);
         mainMenu->addSeparator();
 
+        mainMenu->addAction(m_copyAction);
         mainMenu->addAction(m_checkAllAction);
+        mainMenu->addSeparator();
+
+        mainMenu->addAction(m_newOrderAction);
+        mainMenu->addAction(m_searchHistoryOrderAction);
         mainMenu->addSeparator();
 
         mainMenu->addAction(m_exportToXlsAction);
@@ -100,7 +105,7 @@ void TableWidget::setDataTypeOrderInfo()
     m_header << "订单编号" << "客户" << "订单状态" << "品名" << "单价"
            << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
            << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
-           << "运费(国外)" << "包装费" << "平台手续费" << "总支出" << "总利润"
+           << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
            << "合伙人利润" << "备注";
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
@@ -119,18 +124,23 @@ void TableWidget::setDataTypeOrderInfo()
         mainMenu->clear(); //清除原有菜单
         mainMenu->addSeparator();
 
-        m_editAction->setText(tr("编辑当前订单信息"));
+        m_editAction->setText(tr("编辑"));
         mainMenu->addAction(m_editAction);
 
-        m_deleteAction->setText(tr("删除该订单"));
+        m_deleteAction->setText(tr("删除"));
         mainMenu->addAction(m_deleteAction);
         mainMenu->addSeparator();
 
+        mainMenu->addAction(m_copyAction);
         mainMenu->addAction(m_checkAllAction);
         mainMenu->addSeparator();
 
         mainMenu->addAction(m_exportToXlsAction);
         mainMenu->addAction(m_copyToXlsAction);
+        mainMenu->addSeparator();
+
+        mainMenu->addAction(m_changeOrderStatusToUnpayedAction);
+        mainMenu->addAction(m_changeOrderStatusToPayedAction);
         mainMenu->addSeparator();
     }
 
@@ -165,6 +175,71 @@ void TableWidget::setDataTypeProductInfo()
     setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
+void TableWidget::setCustomerInfo(int row, const CustomerInformation& customerInfo)
+{
+    setCellData(row, 0, customerInfo.name);
+    setCellData(row, 1, customerInfo.level);
+    setCellData(row, 2, customerInfo.status);
+    setCellData(row, 3, customerInfo.enterDate);
+    setCellData(row, 4, customerInfo.inquirySource);
+    setCellData(row, 5, customerInfo.background);
+    setCellData(row, 6, customerInfo.address);
+    setCellData(row, 7, customerInfo.companyName);
+    setCellData(row, 8, customerInfo.websit);
+    setCellData(row, 9, customerInfo.email);
+    setCellData(row, 10, customerInfo.phoneNumber);
+    setCellData(row, 11, customerInfo.position);
+    setCellData(row, 12, customerInfo.schedule);
+    setCellData(row, 13, customerInfo.salesman);
+    setCellData(row, 14, customerInfo.remarks);
+}
+
+QString TableWidget::doubleToStr(double d)
+{
+    QString str = QString::number(d, 'f');
+
+    for (int i=str.size()-1; i>0; i--)
+    {
+        if (('0' == str[i]) || ('.' == str[i]))
+        {
+            str.remove(i, 1);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return str;
+}
+
+bool TableWidget::getSelectedOrderIDList(QStringList &orderList)
+{
+    bool ret = false;
+    orderList.clear();
+
+    QList<QTableWidgetSelectionRange> rangeList = selectedRanges();
+    for (int i=0; i<rangeList.size(); i++)
+    {
+        for (int row=rangeList[i].topRow(); row<=rangeList[i].bottomRow(); row++)
+        {
+            QString orderID = itemText(row, 0);
+            QString status = itemText(row, 2);
+            if ((!orderID.isEmpty()) && (!status.isEmpty()))
+            {
+                orderList.append(orderID);
+            }
+        }
+    }
+
+    if (!orderList.isEmpty())
+    {
+        ret = true;
+    }
+
+    return ret;
+}
+
 void TableWidget::setTableHeader(const QStringList& header)
 {
     m_header = header;
@@ -180,20 +255,7 @@ void TableWidget::addCustomerInformation(const CustomerInformation& customerInfo
 {
     insertRow(m_validRowCnt);
 
-    setCellData(m_validRowCnt, 0, customerInfo.name);
-    setCellData(m_validRowCnt, 1, customerInfo.level);
-    setCellData(m_validRowCnt, 2, customerInfo.status);
-    setCellData(m_validRowCnt, 3, customerInfo.enterDate);
-    setCellData(m_validRowCnt, 4, customerInfo.inquirySource);
-    setCellData(m_validRowCnt, 5, customerInfo.background);
-    setCellData(m_validRowCnt, 6, customerInfo.address);
-    setCellData(m_validRowCnt, 7, customerInfo.companyName);
-    setCellData(m_validRowCnt, 8, customerInfo.email);
-    setCellData(m_validRowCnt, 9, customerInfo.phoneNumber);
-    setCellData(m_validRowCnt, 10, customerInfo.position);
-    setCellData(m_validRowCnt, 11, customerInfo.schedule);
-    setCellData(m_validRowCnt, 12, customerInfo.salesman);
-    setCellData(m_validRowCnt, 13, customerInfo.remarks);
+    setCustomerInfo(m_validRowCnt, customerInfo);
 
     m_validRowCnt++;
 }
@@ -206,81 +268,8 @@ void TableWidget::updateCustomerInformation(int row, const CustomerInformation& 
         return;
     }
 
-    setCellData(row, 0, customerInfo.name);
-    setCellData(row, 1, customerInfo.level);
-    setCellData(row, 2, customerInfo.status);
-    setCellData(row, 3, customerInfo.enterDate);
-    setCellData(row, 4, customerInfo.inquirySource);
-    setCellData(row, 5, customerInfo.background);
-    setCellData(row, 6, customerInfo.address);
-    setCellData(row, 7, customerInfo.companyName);
-    setCellData(row, 8, customerInfo.email);
-    setCellData(row, 9, customerInfo.phoneNumber);
-    setCellData(row, 10, customerInfo.position);
-    setCellData(row, 11, customerInfo.schedule);
-    setCellData(row, 12, customerInfo.salesman);
-    setCellData(row, 13, customerInfo.remarks);
+    setCustomerInfo(row, customerInfo);
 }
-
-void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
-{
-    if (orderInfo.productList.size() <= 0)
-    {
-        return;
-    }
-
-    int startRowCnt = m_validRowCnt;
-    insertRow(m_validRowCnt);
-
-    setCellData(m_validRowCnt, 0, orderInfo.orderID);
-    setCellData(m_validRowCnt, 1, orderInfo.customerName);
-    setCellData(m_validRowCnt, 2, orderInfo.orderStatus);
-    setCellData(m_validRowCnt, 3, orderInfo.productList[0].productName);
-    setCellData(m_validRowCnt, 4, QString::number(orderInfo.productList[0].price));
-    setCellData(m_validRowCnt, 5, QString::number(orderInfo.productList[0].costPrice));
-    setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[0].count));
-    setCellData(m_validRowCnt, 7, orderInfo.productList[0].spec);
-    setCellData(m_validRowCnt, 8, orderInfo.payTime);
-    setCellData(m_validRowCnt, 9, orderInfo.payType);
-    setCellData(m_validRowCnt, 10, QString::number(orderInfo.realIncome));
-    setCellData(m_validRowCnt, 11, QString::number(orderInfo.shouldIncome));
-    setCellData(m_validRowCnt, 12, QString::number(orderInfo.freightCustomer));
-    setCellData(m_validRowCnt, 13, QString::number(orderInfo.freightFactoryToUs));
-    setCellData(m_validRowCnt, 14, QString::number(orderInfo.freightUsToForwarding));
-    setCellData(m_validRowCnt, 15, QString::number(orderInfo.freightForeign));
-    setCellData(m_validRowCnt, 16, QString::number(orderInfo.packageFee));
-    setCellData(m_validRowCnt, 17, QString::number(orderInfo.handlingFee));
-    setCellData(m_validRowCnt, 18, QString::number(orderInfo.tatolExpenses));
-    setCellData(m_validRowCnt, 19, QString::number(orderInfo.totalProfit));
-    setCellData(m_validRowCnt, 20, QString::number(orderInfo.partnerProfit));
-    setCellData(m_validRowCnt, 21, orderInfo.remarks);
-
-    m_validRowCnt++;
-    for (int i=1; i<orderInfo.productList.size(); i++)
-    {
-        setCellData(m_validRowCnt, 3, orderInfo.productList[i].productName);
-        setCellData(m_validRowCnt, 4, QString::number(orderInfo.productList[i].price));
-        setCellData(m_validRowCnt, 5, QString::number(orderInfo.productList[i].costPrice));
-        setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[i].count));
-        setCellData(m_validRowCnt, 7, orderInfo.productList[i].spec);
-        m_validRowCnt++;
-    }
-
-    int productCnt = orderInfo.productList.size();
-    if (m_validRowCnt-startRowCnt > 1)
-    {
-        for (int i=0; i<3; i++)
-        {
-            setSpan(startRowCnt, i, productCnt, 1);
-        }
-
-        for (int i=8; i<m_validClumnCnt; i++)
-        {
-            setSpan(startRowCnt, i, productCnt, 1);
-        }
-    }
-}
-
 
 void TableWidget::addProductInfo(const ProductInfo& productInfo)
 {
@@ -301,6 +290,64 @@ void TableWidget::addProductInfo(const ProductInfo& productInfo)
     m_validRowCnt++;
 }
 
+void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
+{
+    if (orderInfo.productList.size() <= 0)
+    {
+        return;
+    }
+
+    int startRowCnt = m_validRowCnt;
+    insertRow(m_validRowCnt);
+
+    setCellData(m_validRowCnt, 0, orderInfo.orderID);
+    setCellData(m_validRowCnt, 1, orderInfo.customerName);
+    setCellData(m_validRowCnt, 2, orderInfo.orderStatus);
+    setCellData(m_validRowCnt, 3, orderInfo.productList[0].productName);
+    setCellData(m_validRowCnt, 4, doubleToStr(orderInfo.productList[0].price));
+    setCellData(m_validRowCnt, 5, doubleToStr(orderInfo.productList[0].costPrice));
+    setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[0].count));
+    setCellData(m_validRowCnt, 7, orderInfo.productList[0].spec);
+    setCellData(m_validRowCnt, 8, orderInfo.payTime);
+    setCellData(m_validRowCnt, 9, orderInfo.payType);
+    setCellData(m_validRowCnt, 10, doubleToStr(orderInfo.realIncome));
+    setCellData(m_validRowCnt, 11, doubleToStr(orderInfo.shouldIncome));
+    setCellData(m_validRowCnt, 12, doubleToStr(orderInfo.freightCustomer));
+    setCellData(m_validRowCnt, 13, doubleToStr(orderInfo.freightFactoryToUs));
+    setCellData(m_validRowCnt, 14, doubleToStr(orderInfo.freightUsToForwarding));
+    setCellData(m_validRowCnt, 15, doubleToStr(orderInfo.freightForeign));
+    setCellData(m_validRowCnt, 16, doubleToStr(orderInfo.exchangeRate));
+    setCellData(m_validRowCnt, 17, doubleToStr(orderInfo.handlingFee));
+    setCellData(m_validRowCnt, 18, doubleToStr(orderInfo.tatolExpenses));
+    setCellData(m_validRowCnt, 19, doubleToStr(orderInfo.totalProfit));
+    setCellData(m_validRowCnt, 20, doubleToStr(orderInfo.partnerProfit));
+    setCellData(m_validRowCnt, 21, orderInfo.remarks);
+
+    m_validRowCnt++;
+    for (int i=1; i<orderInfo.productList.size(); i++)
+    {
+        setCellData(m_validRowCnt, 3, orderInfo.productList[i].productName);
+        setCellData(m_validRowCnt, 4, doubleToStr(orderInfo.productList[i].price));
+        setCellData(m_validRowCnt, 5, doubleToStr(orderInfo.productList[i].costPrice));
+        setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[i].count));
+        setCellData(m_validRowCnt, 7, orderInfo.productList[i].spec);
+        m_validRowCnt++;
+    }
+
+    int productCnt = orderInfo.productList.size();
+    if (m_validRowCnt-startRowCnt > 1)
+    {
+        for (int i=0; i<3; i++)
+        {
+            setSpan(startRowCnt, i, productCnt, 1);
+        }
+
+        for (int i=8; i<m_validClumnCnt; i++)
+        {
+            setSpan(startRowCnt, i, productCnt, 1);
+        }
+    }
+}
 
 void TableWidget::updateOrderInformation(int row, const OrderInformation& orderInfo)
 {
@@ -313,32 +360,46 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
     setCellData(row, 1, orderInfo.customerName);
     setCellData(row, 2, orderInfo.orderStatus);
     setCellData(row, 3, orderInfo.productList[0].productName);
-    setCellData(row, 4, QString::number(orderInfo.productList[0].price));
-    setCellData(row, 5, QString::number(orderInfo.productList[0].costPrice));
+    setCellData(row, 4, doubleToStr(orderInfo.productList[0].price));
+    setCellData(row, 5, doubleToStr(orderInfo.productList[0].costPrice));
     setCellData(row, 6, QString::number(orderInfo.productList[0].count));
     setCellData(row, 7, orderInfo.productList[0].spec);
     setCellData(row, 8, orderInfo.payTime);
     setCellData(row, 9, orderInfo.payType);
-    setCellData(row, 10, QString::number(orderInfo.realIncome));
-    setCellData(row, 11, QString::number(orderInfo.shouldIncome));
-    setCellData(row, 12, QString::number(orderInfo.freightCustomer));
-    setCellData(row, 13, QString::number(orderInfo.freightFactoryToUs));
-    setCellData(row, 14, QString::number(orderInfo.freightUsToForwarding));
-    setCellData(row, 15, QString::number(orderInfo.freightForeign));
-    setCellData(row, 16, QString::number(orderInfo.packageFee));
-    setCellData(row, 17, QString::number(orderInfo.handlingFee));
-    setCellData(row, 18, QString::number(orderInfo.tatolExpenses));
-    setCellData(row, 19, QString::number(orderInfo.totalProfit));
-    setCellData(row, 20, QString::number(orderInfo.partnerProfit));
+    setCellData(row, 10, doubleToStr(orderInfo.realIncome));
+    setCellData(row, 11, doubleToStr(orderInfo.shouldIncome));
+    setCellData(row, 12, doubleToStr(orderInfo.freightCustomer));
+    setCellData(row, 13, doubleToStr(orderInfo.freightFactoryToUs));
+    setCellData(row, 14, doubleToStr(orderInfo.freightUsToForwarding));
+    setCellData(row, 15, doubleToStr(orderInfo.freightForeign));
+    setCellData(row, 16, doubleToStr(orderInfo.exchangeRate));
+    setCellData(row, 17, doubleToStr(orderInfo.handlingFee));
+    setCellData(row, 18, doubleToStr(orderInfo.tatolExpenses));
+    setCellData(row, 19, doubleToStr(orderInfo.totalProfit));
+    setCellData(row, 20, doubleToStr(orderInfo.partnerProfit));
     setCellData(row, 21, orderInfo.remarks);
 
     for (int i=1; i<orderInfo.productList.size(); i++)
     {
         setCellData(row+i, 3, orderInfo.productList[i].productName);
-        setCellData(row+i, 4, QString::number(orderInfo.productList[i].price));
-        setCellData(row+i, 5, QString::number(orderInfo.productList[i].costPrice));
+        setCellData(row+i, 4, doubleToStr(orderInfo.productList[i].price));
+        setCellData(row+i, 5, doubleToStr(orderInfo.productList[i].costPrice));
         setCellData(row+i, 6, QString::number(orderInfo.productList[i].count));
         setCellData(row+i, 7, orderInfo.productList[i].spec);
+    }
+}
+
+void TableWidget::updateOrderStatus(const QStringList& orderList, const QString& status)
+{
+    for (int i=0; i<orderList.size(); i++)
+    {
+        for (int row=0; row<m_validRowCnt; row++)
+        {
+            if (orderList[i] == itemText(row, 0))
+            {
+                setCellData(row, 2, status);
+            }
+        }
     }
 }
 
@@ -478,10 +539,26 @@ void TableWidget::createActions()
     m_deleteAction->setShortcut(QKeySequence::Delete);
     addAction(m_deleteAction);
 
+    m_copyAction = new QAction(tr("复制"), this);
+    connect(m_copyAction, SIGNAL(triggered(bool)), this, SLOT(onCopy()));
+    m_copyAction->setShortcut(QKeySequence::Copy);
+    addAction(m_copyAction);
+
+    m_changeOrderStatusToUnpayedAction  = new QAction(tr("设置订单状态为\"未结算利润\""), this);
+    connect(m_changeOrderStatusToUnpayedAction, SIGNAL(triggered(bool)), this, SLOT(onChangeOrderStatusToUnpayed()));
+    m_changeOrderStatusToPayedAction  = new QAction(tr("设置订单状态为\"已结算利润\""), this);
+    connect(m_changeOrderStatusToPayedAction, SIGNAL(triggered(bool)), this, SLOT(onChangeOrderStatusToPayed()));
+
     m_checkAllAction = new QAction(tr("全选"), this);
     connect(m_checkAllAction, SIGNAL(triggered(bool)), this, SLOT(onCheckAll()));
     m_checkAllAction->setShortcut(QKeySequence::SelectAll);
     addAction(m_checkAllAction);  // 将checkAllAction添加到当前窗体以响应快捷键
+
+    m_searchHistoryOrderAction = new QAction(tr("查找历史订单"), this);
+    connect(m_searchHistoryOrderAction, SIGNAL(triggered(bool)), this, SLOT(onSearchHistoryOrder()));
+
+    m_newOrderAction = new QAction(tr("新建订单"), this);
+    connect(m_newOrderAction, SIGNAL(triggered(bool)), this, SLOT(onNewOrder()));
 
     m_exportToXlsAction = new QAction(tr("导出列表.xls"), this);         // 导出列表.xls
     connect(m_exportToXlsAction, SIGNAL(triggered(bool)), this, SLOT(onExportToXls()));
@@ -642,6 +719,62 @@ void TableWidget::onEdit()                  // 编辑
     }
 }
 
+void TableWidget::onCopy()
+{
+    /*QList<QTableWidgetSelectionRange> rangeList = selectedRanges();
+    for (int i=0; i<rangeList.size(); i++)
+    {
+        qDebug() << "onCopy" << rangeList[i].topRow() << rangeList[i].bottomRow() << rangeList[i].leftColumn() << rangeList[i].rightColumn();
+
+    }*/
+
+    QTableWidgetSelectionRange range = selectedRanges().first();
+    QString str = "";
+    qDebug() << "onCopy" << range.topRow() << range.bottomRow() << range.leftColumn() << range.rightColumn();
+
+    for (int i=range.topRow(); i<=range.bottomRow(); i++)
+    {
+        for (int j=range.leftColumn(); j<=range.rightColumn(); j++)
+        {
+            str += itemText(i, j);
+            if (j < range.rightColumn())
+            {
+                str += "\t";
+            }
+        }
+
+        str += "\n";
+    }
+
+    QApplication::clipboard()->setText(str);
+}
+
+void TableWidget::onChangeOrderStatusToUnpayed()  // 修改订单状态为“未结算利润”
+{
+    QStringList orderList;
+
+    bool ret = getSelectedOrderIDList(orderList);
+
+    if (ret)
+    {
+        QString status = QString(tr("未结算利润"));
+        emit sigChangeOrderStatus(orderList, status);
+    }
+}
+
+void TableWidget::onChangeOrderStatusToPayed()
+{
+    QStringList orderList;
+
+    bool ret = getSelectedOrderIDList(orderList);
+
+    if (ret)
+    {
+        QString status = QString(tr("已结算利润"));
+        emit sigChangeOrderStatus(orderList, status);
+    }
+}
+
 void TableWidget::onCheckAll()              // CTRL+A勾选全部用户
 {
     //for (int i=0; i<rowCount(); i++) {
@@ -649,6 +782,43 @@ void TableWidget::onCheckAll()              // CTRL+A勾选全部用户
         item(i, 0)->setCheckState(Qt::Checked);
     }
     selectAll();
+}
+
+void TableWidget::onSearchHistoryOrder()      // 查找历史订单
+{
+    QString name = itemText(currentRow(), 0);
+    if (name.isEmpty())
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+        return;
+    }
+
+    for (int i=name.size()-1; i>0; i--)
+    {
+        if (' ' == name[i])
+        {
+            name.remove(i, 1);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    emit sigSearchHistoryOrder(name);
+}
+
+void TableWidget::onNewOrder()                // 新建订单
+{
+    qDebug() << "onNewOrder";
+    QString name = itemText(currentRow(), 0);
+    if (name.isEmpty())
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+        return;
+    }
+
+    emit sigNewOrder(name);
 }
 
 QString TableWidget::convertLineToStr(int rowNum, int startColumn, int endColumn, QString split)
@@ -696,39 +866,7 @@ void TableWidget::editCustomerInfo()
         return;
     }
 
-    SqlDatabase sql("dialog");
-    QList<CustomerInformation> list;
-
-    if (false == sql.getCustomerInfoByName(name, list))
-    {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("从数据库中读取客户信息\"%1\"失败！")).arg(name), QString(tr("确定")));
-        return;
-    }
-
-    CustomerInfoDialog dialog;
-    dialog.setCustomerNameEditDisable();
-    if (list.size() > 0)
-    {
-        dialog.setCustomerInfomation(list[0]);
-    }
-
-    if(dialog.exec() == QDialog::Accepted)
-    {
-        // save to database
-        QList<CustomerInformation> customerInfoList = dialog.getCustomerInformationList();
-        for (int i=0; i<customerInfoList.size(); i++)
-        {
-            if (true == sql.updateCustomerInfo(customerInfoList[i]))
-            {
-                updateCustomerInformation(currentRow(), customerInfoList[i]);
-                QMessageBox::information(this, QString(tr("提示")), QString(tr("更新客户\"%1\"信息到数据库成功！")).arg(customerInfoList[i].name), QString(tr("确定")));
-            }
-            else
-            {
-                QMessageBox::critical(this, QString(tr("错误")), QString(tr("更新客户\"%1\"信息到数据库失败！")).arg(customerInfoList[i].name), QString(tr("确定")));
-            }
-        }
-    }
+    emit sigEditCustomerInfo(currentRow(), name);
 }
 
 void TableWidget::editOrderInfo()
@@ -740,39 +878,7 @@ void TableWidget::editOrderInfo()
         return;
     }
 
-    SqlDatabase sql("dialog");
-    QList<OrderInformation> list;
-
-    if (false == sql.getOrderInfoByOrderID(orderID, list))
-    {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("从数据库中读取订单\"%1\"失败！")).arg(orderID), QString(tr("确定")));
-        return;
-    }
-
-    OrderDialog dialog;
-    dialog.setOrderInfo(list[0]);
-
-    if(dialog.exec() == QDialog::Accepted)
-    {
-        qDebug() << "edit order accepted!";
-        //m_tableWidget->clear();
-        //m_tableWidget->setDataTypeOrderInfo();
-
-        QList<OrderInformation> orderList = dialog.getOrderList();
-        for (int i=0; i<orderList.size(); i++)
-        {
-            if (true == sql.updateOrderInfo(orderList[i]))
-            {
-                updateOrderInformation(currentRow(), orderList[i]);
-                QMessageBox::information(this, QString(tr("提示")), QString(tr("客户\"%1\"订单更新成功，具体内容显示在表格中！")).arg(orderList[i].customerName), QString(tr("确定")));
-            }
-            else
-            {
-                QMessageBox::critical(this, QString(tr("错误")), QString(tr("客户\"%1\"订单更新失败！:%2")).arg(orderList[i].customerName).arg(sql.getErrorStr()), QString(tr("确定")));
-            }
-        }
-    }
-    qDebug() << orderID;
+    emit sigEditOrderInfo(currentRow(), orderID);
 }
 
 void TableWidget::deleteCustomerInfo()

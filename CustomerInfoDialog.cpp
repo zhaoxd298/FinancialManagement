@@ -69,35 +69,40 @@ void CustomerInfoDialog::constructUI()
     layout->addWidget(companyNameLabel, 7, 0, 1, 1);
     layout->addWidget(m_companyName, 7, 1, 1, 4);
 
+    QLabel* websitLabel = new QLabel(tr("网址："));
+    m_websiteEdit = new QLineEdit;
+    layout->addWidget(websitLabel, 8, 0, 1, 1);
+    layout->addWidget(m_websiteEdit, 8, 1, 1, 4);
+
     QLabel* customerEmailLabel = new QLabel(tr("邮箱："));
     m_customerEmail = new QLineEdit;
-    layout->addWidget(customerEmailLabel, 8, 0, 1, 1);
-    layout->addWidget(m_customerEmail, 8, 1, 1, 4);
+    layout->addWidget(customerEmailLabel, 9, 0, 1, 1);
+    layout->addWidget(m_customerEmail, 9, 1, 1, 4);
 
     QLabel* phoneNumberLabel = new QLabel(tr("联系方式："));
     m_phoneNumber = new QLineEdit;
-    layout->addWidget(phoneNumberLabel, 9, 0, 1, 1);
-    layout->addWidget(m_phoneNumber, 9, 1, 1, 4);
+    layout->addWidget(phoneNumberLabel, 10, 0, 1, 1);
+    layout->addWidget(m_phoneNumber, 10, 1, 1, 4);
 
     QLabel* customerPositionLabel = new QLabel(tr("职位："));
     m_customerPosition = new QLineEdit;
-    layout->addWidget(customerPositionLabel, 10, 0, 1, 1);
-    layout->addWidget(m_customerPosition, 10, 1, 1, 4);
+    layout->addWidget(customerPositionLabel, 11, 0, 1, 1);
+    layout->addWidget(m_customerPosition, 11, 1, 1, 4);
 
     QLabel* salesmanLabel = new QLabel(tr("业务员："));
     m_salesman = new QLineEdit("Amy");
-    layout->addWidget(salesmanLabel, 11, 0, 1, 1);
-    layout->addWidget(m_salesman, 11, 1, 1, 4);
+    layout->addWidget(salesmanLabel, 12, 0, 1, 1);
+    layout->addWidget(m_salesman, 12, 1, 1, 4);
 
     QLabel* m_remarksLabel = new QLabel(tr("备注："));
     m_remarksEdit = new QLineEdit;
-    layout->addWidget(m_remarksLabel, 12, 0, 1, 1);
-    layout->addWidget(m_remarksEdit, 12, 1, 1, 4);
+    layout->addWidget(m_remarksLabel, 13, 0, 1, 1);
+    layout->addWidget(m_remarksEdit, 13, 1, 1, 4);
 
     QLabel* scheduleLabel = new QLabel(tr("跟进情况："));
     m_schedule = new QPlainTextEdit;
-    layout->addWidget(scheduleLabel, 13, 0, 1, 1);
-    layout->addWidget(m_schedule, 13, 1, 1, 4);
+    layout->addWidget(scheduleLabel, 14, 0, 1, 1);
+    layout->addWidget(m_schedule, 14, 1, 1, 4);
 
     m_okBtn = new QPushButton(tr("确认"));
     m_cancelBtn = new QPushButton(tr("取消"));
@@ -136,6 +141,7 @@ void CustomerInfoDialog::setCustomerInfomation(const CustomerInformation& custom
     m_backgroundEdit->setText(customerInfo.background);
     m_addressEdit->setText(customerInfo.address);
     m_companyName->setText(customerInfo.companyName);
+    m_websiteEdit->setText(customerInfo.websit);
     m_customerEmail->setText(customerInfo.email);
     m_phoneNumber->setText(customerInfo.phoneNumber);
     m_customerPosition->setText(customerInfo.position);
@@ -164,6 +170,7 @@ void CustomerInfoDialog::onOKBtn()
     customerInfo.background = m_backgroundEdit->text();
     customerInfo.address = m_addressEdit->text();
     customerInfo.companyName = m_companyName->text();
+    customerInfo.websit = m_websiteEdit->text();
     customerInfo.email = m_customerEmail->text();
     customerInfo.phoneNumber = m_phoneNumber->text();
     customerInfo.position = m_customerPosition->text();

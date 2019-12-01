@@ -20,13 +20,14 @@ void SearchCustomerDialog::constructUI()
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-    items << "按状态" << "按姓名" << "按询盘来源" << "按国家" << "按客户公司名" << "按邮箱" << "按电话" << "按业务员";
+    items << "按姓名" << "按状态" << "按邮箱" << "按电话" << "按客户公司名" << "按国家" << "按询盘来源" << "按业务员";
+
     m_searchTypeCBox->addItems(items);
 
     QLabel* kerWordLabel = new QLabel(tr("关键字："));
     kerWordLabel->setFixedWidth(60);
-    //kerWordLabel->setSizePolicy(QSizePolicy::Fixed);
     m_keyWordEdit = new QLineEdit;
+
 
     m_statusCBox = new QComboBox;
     items.clear();
@@ -37,7 +38,7 @@ void SearchCustomerDialog::constructUI()
     m_gridLayout->addWidget(searchTypeLabel, 0, 0, 1, 1);
     m_gridLayout->addWidget(m_searchTypeCBox, 0, 1, 1, 2);
     m_gridLayout->addWidget(kerWordLabel, 1, 0, 1, 1);
-    m_gridLayout->addWidget(m_statusCBox, 1, 1, 1, 2);
+    m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 2);
 
     m_okBtn = new QPushButton(tr("确认"));
     QHBoxLayout* onBtnHLayout = new QHBoxLayout;
@@ -48,6 +49,8 @@ void SearchCustomerDialog::constructUI()
     mainVLayout->addLayout(m_gridLayout);
     mainVLayout->addStretch();
     mainVLayout->addLayout(onBtnHLayout);
+
+    m_keyWordEdit->setFocus();
 
     setWindowTitle(tr("查找客户"));
 
@@ -76,7 +79,7 @@ void SearchCustomerDialog::onOkBtn()
 {
     m_searchType = m_searchTypeCBox->currentIndex();
 
-    if (0 == m_searchType)
+    if (SearchByStatus == m_searchType)
     {
         m_keyWord = m_statusCBox->currentText();
     }
@@ -96,7 +99,7 @@ void SearchCustomerDialog::onOkBtn()
 
 void SearchCustomerDialog::onCbxIndexChanged(int index)
 {
-    if (0 == m_lastStatusCbxIndex)
+    if (SearchByStatus == m_lastStatusCbxIndex)
     {
         m_gridLayout->removeWidget(m_statusCBox);
         m_statusCBox->setParent(NULL);
@@ -107,7 +110,7 @@ void SearchCustomerDialog::onCbxIndexChanged(int index)
         m_keyWordEdit->setParent(NULL);
     }
 
-    if (0 == index)
+    if (SearchByStatus == index)
     {
         m_gridLayout->addWidget(m_statusCBox, 1, 1, 1, 2);
     }
@@ -115,6 +118,7 @@ void SearchCustomerDialog::onCbxIndexChanged(int index)
     {
 
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 2);
+        m_keyWordEdit->setFocus();
     }
 
     m_lastStatusCbxIndex = index;

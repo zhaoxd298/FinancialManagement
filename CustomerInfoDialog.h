@@ -25,6 +25,7 @@ private:
     QLineEdit* m_backgroundEdit;        // 背景
     QLineEdit* m_addressEdit;
     QLineEdit* m_companyName;
+    QLineEdit* m_websiteEdit;               // 网址
     QLineEdit* m_customerEmail;
     QLineEdit* m_phoneNumber;
     QLineEdit* m_customerPosition;

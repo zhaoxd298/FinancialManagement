@@ -27,11 +27,12 @@ private:
     QComboBox* m_payTypeCbx;					// 付款方式
     QLineEdit* m_realIncomeEdit;                // 实收
     QLineEdit* m_handlingFeeEdit;				// 平台手续费
+    QPushButton* m_calHandlingFeeBtn;           // 自动计算平台手续费
     QLineEdit* m_freightCustomerEdit;			// 运费(客户)
     QLineEdit* m_freightFactoryToUsEdit;		// 运费(工厂→我司)
     QLineEdit* m_freightUsToForwardingEdit;		// 运费(我司→货代)
     QLineEdit* m_freightForeignEdit;			// 运费(国外)
-    QLineEdit* m_packageFeeEdit;				// 包装费
+    QLineEdit* m_exchangeRateEdit;				// 汇率
     QLineEdit* m_remarksEdit;					// 备注
 
     TableWidget* m_productTableWidget;         // 产品信息
@@ -45,9 +46,13 @@ public:
 
     QList<OrderInformation> getOrderList();
     void setOrderInfo(const OrderInformation& orderInfo);
+
+    void setCustomerName(const QString& name);
+    void disableCustomerNameEdit();
 public slots:
     void onOKBtn();
     void onCancelBtn();
+    void onCalHandlingFeeBtn();
 };
 
 #endif // ADDCUSTOMERDIALOG_H

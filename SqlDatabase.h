@@ -59,6 +59,7 @@ public:
 
     bool orderInfoIsExist(const QString& orderID);      // 订单信息是否存在
     bool insertOrderInfo(const OrderInformation& orderInfo);
+    bool updateOrderStatus(const QStringList& orderList, const QString& status);
     bool updateOrderInfo(const OrderInformation& orderInfo);
     bool getAllOrderInfo(QList<OrderInformation>& orderInfoList);
     bool getOrderInfoByOrderID(const QString& orderID, QList<OrderInformation>& orderInfoList);

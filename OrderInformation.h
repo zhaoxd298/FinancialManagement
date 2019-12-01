@@ -55,7 +55,7 @@ struct OrderInformation
     double freightFactoryToUs;          // 运费(工厂→我司)
     double freightUsToForwarding;       // 运费(我司→货代)
     double freightForeign;              // 运费(国外)
-    double packageFee;                  // 包装费
+    double exchangeRate;                // 汇率
     double handlingFee;                 // 平台手续费
     double tatolExpenses;               // 总支出
     double totalProfit;                 // 总利润
@@ -79,7 +79,7 @@ struct OrderInformation
         freightFactoryToUs = 0;
         freightUsToForwarding = 0;
         freightForeign = 0;
-        packageFee = 0;
+        exchangeRate = 0;
         tatolExpenses = 0;
         totalProfit = 0;
         partnerProfit = 0;
@@ -106,7 +106,7 @@ struct OrderInformation
         tatolExpenses += freightFactoryToUs;
         tatolExpenses += freightUsToForwarding;
         tatolExpenses += freightForeign;
-        tatolExpenses += packageFee;
+        //tatolExpenses += packageFee;
         for (int i=0; i<productList.size(); i++)
         {
             tatolExpenses += productList[i].totalCost;

@@ -24,6 +24,8 @@ private:
     void constructUI();
     void connectSlots();
 
+    bool addNewOrder(const QString& customerName="");
+
 public:
     MainWindow(QWidget *parent = 0);
 
@@ -32,8 +34,17 @@ public:
 public slots:
     void onAddCustomerBtn();
     void onSearchCustomerBtn();
+
     void onAddOrderBtn();
     void onSearchOrderBtn();
+
+    void onEditCustomerInfo(int row, const QString& name);
+    void onEditOrderInfo(int row, const QString& orderID);
+
+    void onSearchHistoryOrder(const QString& name);      // 查找历史订单
+    void onNewOrder(const QString& name);                // 新建订单
+
+    void onChangeOrderStatus(const QStringList& orderList, const QString& status);  // 修改订单状态为“已结算利润”
 };
 
 #endif // MAINWINDOW_H

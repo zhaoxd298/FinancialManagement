@@ -11,6 +11,7 @@ OrderDialog::OrderDialog(QWidget *parent)
 
     connect(m_okBtn, SIGNAL(clicked(bool)), this, SLOT(onOKBtn()));
     connect(m_cancelBtn, SIGNAL(clicked(bool)), this, SLOT(onCancelBtn()));
+    connect(m_calHandlingFeeBtn, SIGNAL(clicked(bool)), this, SLOT(onCalHandlingFeeBtn()));
 }
 
 void OrderDialog::constructUI()
@@ -48,7 +49,7 @@ void OrderDialog::constructUI()
     QLabel* payTypeLabel = new QLabel(tr("付款方式："));
     m_payTypeCbx = new QComboBox;
     items.clear();
-    items << "信保" << "微信" << "支付宝" << "大陆美金账户" << "香港账户" << "西联汇款" << "Paypol" << "其他";
+    items << "信保" << "微信" << "支付宝" << "大陆美金账户" << "香港账户" << "西联汇款" << "Paypal" << "其他";
     m_payTypeCbx->addItems(items);
     gridLayout->addWidget(payTypeLabel, 4, 0, 1, 1);
     gridLayout->addWidget(m_payTypeCbx, 4, 1, 1, 2);
@@ -83,11 +84,11 @@ void OrderDialog::constructUI()
     gridLayout->addWidget(freightForeignLabel, 9, 0, 1, 1);
     gridLayout->addWidget(m_freightForeignEdit, 9, 1, 1, 2);
 
-    QLabel* packageFeeLabel = new QLabel(tr("包装费："));
-    m_packageFeeEdit = new QLineEdit;
-    m_packageFeeEdit->setText("0");
-    gridLayout->addWidget(packageFeeLabel, 10, 0, 1, 1);
-    gridLayout->addWidget(m_packageFeeEdit, 10, 1, 1, 2);
+    QLabel* exchangeRateLabel = new QLabel(tr("汇率："));
+    m_exchangeRateEdit = new QLineEdit;
+    m_exchangeRateEdit->setText("0");
+    gridLayout->addWidget(exchangeRateLabel, 10, 0, 1, 1);
+    gridLayout->addWidget(m_exchangeRateEdit, 10, 1, 1, 2);
 
 
     QLabel* handlingFeeLabel = new QLabel(tr("平台手续费："));
@@ -95,6 +96,9 @@ void OrderDialog::constructUI()
     m_handlingFeeEdit->setText("0");
     gridLayout->addWidget(handlingFeeLabel, 11, 0, 1, 1);
     gridLayout->addWidget(m_handlingFeeEdit, 11, 1, 1, 2);
+
+    m_calHandlingFeeBtn = new QPushButton(tr("自动计算"));
+    gridLayout->addWidget(m_calHandlingFeeBtn, 11, 3, 1, 1);
 
     QLabel* remarksLabel = new QLabel(tr("备注："));
     m_remarksEdit = new QLineEdit;
@@ -144,13 +148,23 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
     m_freightFactoryToUsEdit->setText(QString::number(orderInfo.freightFactoryToUs));
     m_freightUsToForwardingEdit->setText(QString::number(orderInfo.freightUsToForwarding));
     m_freightForeignEdit->setText(QString::number(orderInfo.freightForeign));
-    m_packageFeeEdit->setText(QString::number(orderInfo.packageFee));
+    m_exchangeRateEdit->setText(QString::number(orderInfo.exchangeRate));
     m_remarksEdit->setText(orderInfo.remarks);
 
     for (int i=0; i<orderInfo.productList.size(); i++)
     {
         m_productTableWidget->addProductInfo(orderInfo.productList[i]);
     }
+}
+
+void OrderDialog::setCustomerName(const QString& name)
+{
+    m_customerNameEdit->setText(name);
+}
+
+void OrderDialog::disableCustomerNameEdit()
+{
+    m_customerNameEdit->setEnabled(false);
 }
 
 void OrderDialog::onOKBtn()
@@ -170,7 +184,7 @@ void OrderDialog::onOKBtn()
     orderInfo.freightFactoryToUs = m_freightFactoryToUsEdit->text().toDouble();
     orderInfo.freightUsToForwarding = m_freightUsToForwardingEdit->text().toDouble();
     orderInfo.freightForeign = m_freightForeignEdit->text().toDouble();
-    orderInfo.packageFee = m_packageFeeEdit->text().toDouble();
+    orderInfo.exchangeRate = m_exchangeRateEdit->text().toDouble();
     orderInfo.remarks = m_remarksEdit->text();
     orderInfo.salesman = "Amy";
 
@@ -193,4 +207,15 @@ void OrderDialog::onOKBtn()
 void OrderDialog::onCancelBtn()
 {
     this->reject();
+}
+
+void OrderDialog::onCalHandlingFeeBtn()
+{
+    bool ret;
+    double totalIncome = m_realIncomeEdit->text().toDouble(&ret);
+
+    if (ret)
+    {
+        m_handlingFeeEdit->setText(QString::number(totalIncome*0.04));
+    }
 }

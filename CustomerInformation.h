@@ -13,6 +13,7 @@ struct CustomerInformation
     QString background;
     QString address;
     QString companyName;
+    QString websit;
     QString email;
     QString phoneNumber;
     QString position;

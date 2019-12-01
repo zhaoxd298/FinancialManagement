@@ -28,6 +28,17 @@ private:
     void constructUI();
     void connectSlots();
 public:
+    enum {
+        SearchByName            = 0,
+        SearchByStatus          = 1,
+        SearchByEmail           = 2,
+        SearchByPhoneNumber     = 3,
+        searchByCompany         = 4,
+        SearchByCountry         = 5,
+        SearchByInquirySource   = 6,
+        SearchBySalesman        = 7
+    };
+public:
     SearchCustomerDialog(QWidget *parent = 0);
     ~SearchCustomerDialog();
 

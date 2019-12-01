@@ -24,11 +24,18 @@ private:
     QList<bool> m_orderList;
 
     QAction* m_editAction;
+    QAction* m_deleteAction;
+    QAction* m_copyAction;
+    QAction* m_changeOrderStatusToUnpayedAction;
+    QAction* m_changeOrderStatusToPayedAction;
     QAction* m_checkAllAction;
+
+    QAction* m_searchHistoryOrderAction;      // 查找历史订单
+    QAction* m_newOrderAction;                // 新建订单
+
     QAction* m_exportToXlsAction;
     QAction* m_copyToXlsAction;
     QAction* m_addProductAction;
-    QAction* m_deleteAction;
     QMenu* mainMenu;
 
     enum {DEFAULT_ROW_CNT = 100};
@@ -52,11 +59,17 @@ private:
     QString convertLineToStr(int rowNum, int startColumn, int endColumn, QString split = tr("----"));
     QString convertLineToXlsStr(int rowNum, int startColumn, int endColumn, QString split = tr("----"));
 
-   void editCustomerInfo();
-   void editOrderInfo();
+    void editCustomerInfo();
+    void editOrderInfo();
 
-   void deleteCustomerInfo();
-   void deleteOrderInfo();
+    void deleteCustomerInfo();
+    void deleteOrderInfo();
+
+    void setCustomerInfo(int row, const CustomerInformation& customerInfo);
+
+    QString doubleToStr(double d);
+
+    bool getSelectedOrderIDList(QStringList& orderList);
 protected:
     void contextMenuEvent(QContextMenuEvent *event);
 
@@ -73,9 +86,10 @@ public:
     void addCustomerInformation(const CustomerInformation& customerInfo);
     void updateCustomerInformation(int row, const CustomerInformation& customerInfo);
 
-    void addOrderInformation(const OrderInformation& orderInfo);
     void addProductInfo(const ProductInfo& productInfo);
+    void addOrderInformation(const OrderInformation& orderInfo);
     void updateOrderInformation(int row, const OrderInformation& orderInfo);
+    void updateOrderStatus(const QStringList& orderList, const QString& status);
 
     QList<ProductInfo> getProductList();
 
@@ -85,12 +99,28 @@ public:
     void checkAll();
     void uncheckAll();
 
+signals:
+    void sigEditCustomerInfo(int row, const QString& name);
+    void sigEditOrderInfo(int row, const QString& orderID);
+
+    void sigSearchHistoryOrder(const QString& name);
+    void sigNewOrder(const QString& name);
+
+    void sigChangeOrderStatus(const QStringList& orderList, const QString& status);
+
 public slots:
     void onHeaderClicked(int i);    // 单击表头槽函数
 
     void onEdit();                  // 编辑
+    void onCopy();
+
+    void onChangeOrderStatusToUnpayed();  // 修改订单状态为“未结算利润”
+    void onChangeOrderStatusToPayed();  // 修改订单状态为“已结算利润”
 
     void onCheckAll();              // CTRL+A勾选全部用户
+
+    void onSearchHistoryOrder();      // 查找历史订单
+    void onNewOrder();                // 新建订单
 
     void onExportToXls();           // 导出列表.xls
     void onCopyToXls();             // 复制列表.xls

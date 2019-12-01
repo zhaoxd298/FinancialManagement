@@ -41,6 +41,7 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "background varchar,"
                                   "address varchar,"
                                   "companyName varchar,"
+                                  "websit varchar,"
                                   "email varchar,"
                                   "phoneNumber varchar,"
                                   "position varchar,"
@@ -72,7 +73,7 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "freightFactoryToUs DOUBLE,"
                                   "freightUsToForwarding DOUBLE,"
                                   "freightForeign DOUBLE,"
-                                  "packageFee DOUBLE,"
+                                  "exchangeRate DOUBLE,"
                                   "handlingFee DOUBLE,"
                                   "remarks varchar,"
                                   "salesman varchar)").arg(ORDER_TABLE);
@@ -130,7 +131,7 @@ bool SqlDatabase::insertCustomerInfo(const CustomerInformation& customerInfo)
     }
     else    // 插入数据
     {
-        m_customerQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(CUSTOMER_TABLE));
+        m_customerQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(CUSTOMER_TABLE));
 
         m_customerQuery->bindValue(0, customerInfo.name);
         m_customerQuery->bindValue(1, customerInfo.level);
@@ -140,12 +141,13 @@ bool SqlDatabase::insertCustomerInfo(const CustomerInformation& customerInfo)
         m_customerQuery->bindValue(5, customerInfo.background);
         m_customerQuery->bindValue(6, customerInfo.address);
         m_customerQuery->bindValue(7, customerInfo.companyName);
-        m_customerQuery->bindValue(8, customerInfo.email);
-        m_customerQuery->bindValue(9, customerInfo.phoneNumber);
-        m_customerQuery->bindValue(10, customerInfo.position);
-        m_customerQuery->bindValue(11, customerInfo.schedule);
-        m_customerQuery->bindValue(12, customerInfo.salesman);
-        m_customerQuery->bindValue(13, customerInfo.remarks);
+        m_customerQuery->bindValue(8, customerInfo.websit);
+        m_customerQuery->bindValue(9, customerInfo.email);
+        m_customerQuery->bindValue(10, customerInfo.phoneNumber);
+        m_customerQuery->bindValue(11, customerInfo.position);
+        m_customerQuery->bindValue(12, customerInfo.schedule);
+        m_customerQuery->bindValue(13, customerInfo.salesman);
+        m_customerQuery->bindValue(14, customerInfo.remarks);
         ret = m_customerQuery->exec();
         if(!ret)
         {
@@ -179,6 +181,7 @@ bool SqlDatabase::updateCustomerInfo(const CustomerInformation& customerInfo)
                               "background = :background,"
                               "address = :address,"
                               "companyName = :companyName,"
+                              "websit = :websit,"
                               "email = :email,"
                               "phoneNumber = :phoneNumber,"
                               "position = :position,"
@@ -195,6 +198,7 @@ bool SqlDatabase::updateCustomerInfo(const CustomerInformation& customerInfo)
         m_customerQuery->bindValue(":background", customerInfo.background);
         m_customerQuery->bindValue(":address", customerInfo.address);
         m_customerQuery->bindValue(":companyName", customerInfo.companyName);
+        m_customerQuery->bindValue(":websit", customerInfo.websit);
         m_customerQuery->bindValue(":email", customerInfo.email);
         m_customerQuery->bindValue(":phoneNumber", customerInfo.phoneNumber);
         m_customerQuery->bindValue(":position", customerInfo.position);
@@ -454,7 +458,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(7, orderInfo.freightFactoryToUs);
         m_orderQuery->bindValue(8, orderInfo.freightUsToForwarding);
         m_orderQuery->bindValue(9, orderInfo.freightForeign);
-        m_orderQuery->bindValue(10, orderInfo.packageFee);
+        m_orderQuery->bindValue(10, orderInfo.exchangeRate);
         m_orderQuery->bindValue(11, orderInfo.handlingFee);
         m_orderQuery->bindValue(12, orderInfo.remarks);
         m_orderQuery->bindValue(13, orderInfo.salesman);
@@ -475,6 +479,48 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
                 m_errorStr = QString("insert \"%1\" error!").arg(orderInfo.productList[i].productName);
                 qDebug() << m_errorStr;
             }
+        }
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::updateOrderStatus(const QStringList& orderList, const QString& status)
+{
+    bool ret = false;
+
+    if (!m_orderQueryIsOK || orderList.isEmpty())
+    {
+        return ret;
+    }
+
+    for (int i=0; i<orderList.size(); i++)
+    {
+        if (orderInfoIsExist(orderList[i]))     // 要插入的数据已经存在
+        {
+            QString cmd = QString("update %1 set "
+                                  "orderStatus = :orderStatus "
+                                  "where orderID = :orderID").arg(ORDER_TABLE);
+            m_orderQuery->prepare(cmd);
+
+            m_orderQuery->bindValue(":orderStatus", status);
+            m_orderQuery->bindValue(":orderID", orderList[i]);
+
+            ret = m_orderQuery->exec();
+            if (!ret)
+            {
+                m_errorStr = "更新订单状态失败：" + m_orderQuery->lastError().text();
+                break;
+            }
+            else
+            {
+                m_errorStr = "更新订单状态成功！";
+            }
+        }
+        else
+        {
+            m_errorStr = "data is not exist!";
+            ret = false;
         }
     }
 
@@ -502,7 +548,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
                               "freightFactoryToUs = :freightFactoryToUs,"
                               "freightUsToForwarding = :freightUsToForwarding,"
                               "freightForeign = :freightForeign,"
-                              "packageFee = :packageFee,"
+                              "exchangeRate = :exchangeRate,"
                               "handlingFee = :handlingFee,"
                               "remarks = :remarks,"
                               "salesman = :salesman "
@@ -518,7 +564,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(":freightFactoryToUs", orderInfo.freightFactoryToUs);
         m_orderQuery->bindValue(":freightUsToForwarding", orderInfo.freightUsToForwarding);
         m_orderQuery->bindValue(":freightForeign", orderInfo.freightForeign);
-        m_orderQuery->bindValue(":packageFee", orderInfo.packageFee);
+        m_orderQuery->bindValue(":exchangeRate", orderInfo.exchangeRate);
         m_orderQuery->bindValue(":handlingFee", orderInfo.handlingFee);
         m_orderQuery->bindValue(":remarks", orderInfo.remarks);
         m_orderQuery->bindValue(":salesman", orderInfo.salesman);
@@ -908,12 +954,13 @@ void SqlDatabase::getCustomerInfoList(QSqlQuery* query, QList<CustomerInformatio
         info.background = query->value(5).toString();
         info.address = query->value(6).toString();
         info.companyName = query->value(7).toString();
-        info.email = query->value(8).toString();
-        info.phoneNumber = query->value(9).toString();
-        info.position = query->value(10).toString();
-        info.schedule = query->value(11).toString();
-        info.salesman = query->value(12).toString();
-        info.remarks = query->value(13).toString();
+        info.websit = query->value(8).toString();
+        info.email = query->value(9).toString();
+        info.phoneNumber = query->value(10).toString();
+        info.position = query->value(11).toString();
+        info.schedule = query->value(12).toString();
+        info.salesman = query->value(13).toString();
+        info.remarks = query->value(14).toString();
 
         customerInfoList.append(info);
     }
@@ -934,7 +981,7 @@ void SqlDatabase::getOrderInfoList(QSqlQuery* query, QList<OrderInformation>& or
         orderInfo.freightFactoryToUs = m_orderQuery->value(7).toDouble();
         orderInfo.freightUsToForwarding = m_orderQuery->value(8).toDouble();
         orderInfo.freightForeign = m_orderQuery->value(9).toDouble();
-        orderInfo.packageFee = m_orderQuery->value(10).toDouble();
+        orderInfo.exchangeRate = m_orderQuery->value(10).toDouble();
         orderInfo.handlingFee = m_orderQuery->value(11).toDouble();
         orderInfo.remarks = m_orderQuery->value(12).toString();
         orderInfo.salesman = m_orderQuery->value(13).toString();
