@@ -198,15 +198,23 @@ QString TableWidget::doubleToStr(double d)
 {
     QString str = QString::number(d, 'f');
 
-    for (int i=str.size()-1; i>0; i--)
+    if (str.contains('.'))
     {
-        if (('0' == str[i]) || ('.' == str[i]))
+        for (int i=str.size()-1; i>0; i--)
         {
-            str.remove(i, 1);
-        }
-        else
-        {
-            break;
+            if ('0' == str[i])
+            {
+                str.remove(i, 1);
+            }
+            else if ('.' == str[i])
+            {
+                str.remove(i, 1);
+                break;
+            }
+            else
+            {
+                break;
+            }
         }
     }
 
