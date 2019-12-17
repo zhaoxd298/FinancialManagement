@@ -449,6 +449,7 @@ bool TableWidget::setItemData(int row, int column, int data)
     QTableWidgetItem* it = item(row, column);
     if (NULL != it) {
         it->setData(Qt::UserRole+1, QVariant(data));
+        //it->setData(Qt::DisplayRole, QVariant(data));
         return true;
     }
 
@@ -513,9 +514,13 @@ void TableWidget::setCellData(int row, int column, QString data)
     QTableWidgetItem* it = item(row, column);
     if (NULL == it) {
         it = new QTableWidgetItem(data);
+        it->setToolTip(data);
+        //it->setData(Qt::DisplayRole, QVariant(data));
         setItem(row, column, it);
     } else {
         it->setText(data);
+        it->setToolTip(data);
+        //it->setData(Qt::DisplayRole, QVariant(data));
     }
 }
 
