@@ -48,6 +48,10 @@ private:
 private:
     bool setItemData(int row, int column, int data);
     int itemData(int row, int column);
+
+    bool setItemStrData(int row, int column, QString str);
+    QString itemStrData(int row, int column);
+
     QString itemText(int row, int column);
 
     bool productIsEmpty(int row);           // 当前行商品编号是否为空

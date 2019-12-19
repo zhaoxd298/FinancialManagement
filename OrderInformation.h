@@ -45,8 +45,9 @@ struct ProductInfo
 struct OrderInformation
 {
     QString orderID;                    // 订单编号
+    QString contractID;                 // 合同编号
     QString customerName;               // 客户
-    QString orderStatus;              // 订单状态
+    QString orderStatus;                // 订单状态
     QString payTime;                    // 付款时间
     QString payType;                    // 付款方式
     double realIncome;                  // 实收

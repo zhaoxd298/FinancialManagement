@@ -21,6 +21,7 @@ private:
     QList<OrderInformation> m_orderInfoList;
 
     QLineEdit* m_orderIDEdit;					// 订单编号
+    QLineEdit* m_contractIDEdit;                // 合同编号
     QLineEdit* m_customerNameEdit;				// 客户
     QComboBox* m_orderStatusCbx;				// 订单状态
     QDateTimeEdit* m_payTimeEdit;				// 付款时间

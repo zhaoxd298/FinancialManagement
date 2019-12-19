@@ -102,7 +102,7 @@ void TableWidget::setDataTypeOrderInfo()
     m_dataType = DATA_IS_ORDER_INFO;
 
     m_header.clear();
-    m_header << "订单编号" << "客户" << "订单状态" << "品名" << "单价"
+    m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
            << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
            << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
@@ -231,7 +231,7 @@ bool TableWidget::getSelectedOrderIDList(QStringList &orderList)
     {
         for (int row=rangeList[i].topRow(); row<=rangeList[i].bottomRow(); row++)
         {
-            QString orderID = itemText(row, 0);
+            QString orderID = itemStrData(row, 0);
             QString status = itemText(row, 2);
             if ((!orderID.isEmpty()) && (!status.isEmpty()))
             {
@@ -308,7 +308,8 @@ void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
     int startRowCnt = m_validRowCnt;
     insertRow(m_validRowCnt);
 
-    setCellData(m_validRowCnt, 0, orderInfo.orderID);
+    setCellData(m_validRowCnt, 0, orderInfo.contractID);
+    setItemStrData(m_validRowCnt, 0, orderInfo.orderID);
     setCellData(m_validRowCnt, 1, orderInfo.customerName);
     setCellData(m_validRowCnt, 2, orderInfo.orderStatus);
     setCellData(m_validRowCnt, 3, orderInfo.productList[0].productName);
@@ -364,7 +365,8 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
         return;
     }
 
-    //setCellData(m_validRowCnt, 0, orderInfo.orderID);
+    setCellData(row, 0, orderInfo.contractID);
+    setItemStrData(row, 0, orderInfo.orderID);
     setCellData(row, 1, orderInfo.customerName);
     setCellData(row, 2, orderInfo.orderStatus);
     setCellData(row, 3, orderInfo.productList[0].productName);
@@ -403,7 +405,7 @@ void TableWidget::updateOrderStatus(const QStringList& orderList, const QString&
     {
         for (int row=0; row<m_validRowCnt; row++)
         {
-            if (orderList[i] == itemText(row, 0))
+            if (orderList[i] == itemStrData(row, 0))
             {
                 setCellData(row, 2, status);
             }
@@ -449,7 +451,6 @@ bool TableWidget::setItemData(int row, int column, int data)
     QTableWidgetItem* it = item(row, column);
     if (NULL != it) {
         it->setData(Qt::UserRole+1, QVariant(data));
-        //it->setData(Qt::DisplayRole, QVariant(data));
         return true;
     }
 
@@ -466,6 +467,29 @@ int TableWidget::itemData(int row, int column)
     }
 
     return data;
+}
+
+bool TableWidget::setItemStrData(int row, int column, QString str)
+{
+    QTableWidgetItem* it = item(row, column);
+    if (NULL != it) {
+        it->setData(Qt::UserRole+1, QVariant(str.toLatin1()));
+        return true;
+    }
+
+    return false;
+}
+
+QString TableWidget::itemStrData(int row, int column)
+{
+    QString str = "";
+
+    QTableWidgetItem* it = item(row, column);
+    if (NULL != it) {
+        str = it->data(Qt::UserRole+1).toString();
+    }
+
+    return str;
 }
 
 QString TableWidget::itemText(int row, int column)
@@ -884,7 +908,7 @@ void TableWidget::editCustomerInfo()
 
 void TableWidget::editOrderInfo()
 {
-    QString orderID = itemText(currentRow(), 0);
+    QString orderID = itemStrData(currentRow(), 0);
     if (orderID.isEmpty())
     {
         QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取订单编号失败失败！")), QString(tr("确定")));
@@ -920,7 +944,8 @@ void TableWidget::deleteCustomerInfo()
 
 void TableWidget::deleteOrderInfo()
 {
-    QString orderID = itemText(currentRow(), 0);
+    QString orderID = itemStrData(currentRow(), 0);
+    QString contractID = itemText(currentRow(), 0);
     if (orderID.isEmpty())
     {
         QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取订单号失败！")), QString(tr("确定")));
@@ -939,11 +964,11 @@ void TableWidget::deleteOrderInfo()
                 qDebug() << "remove:" << i;
                 removeRow(i);
             }
-            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(orderID), QString(tr("确定")));
+            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(contractID), QString(tr("确定")));
         }
         else
         {
-            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"删除失败:%2")).arg(orderID).arg(sql.getErrorStr()), QString(tr("确定")));
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"删除失败:%2")).arg(contractID).arg(sql.getErrorStr()), QString(tr("确定")));
         }
     }
 }

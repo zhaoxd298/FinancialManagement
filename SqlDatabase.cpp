@@ -76,7 +76,8 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "exchangeRate DOUBLE,"
                                   "handlingFee DOUBLE,"
                                   "remarks varchar,"
-                                  "salesman varchar)").arg(ORDER_TABLE);
+                                  "salesman varchar,"
+                                  "contractID varchar)").arg(ORDER_TABLE);
         m_orderQueryIsOK = m_orderQuery->exec(cmd);
         m_errorStr = m_orderQuery->lastError().text();
     } else {
@@ -446,7 +447,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
     }
     else    // 插入数据
     {
-        m_orderQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(ORDER_TABLE));
+        m_orderQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(ORDER_TABLE));
 
         m_orderQuery->bindValue(0, orderInfo.orderID);
         m_orderQuery->bindValue(1, orderInfo.customerName);
@@ -462,6 +463,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(11, orderInfo.handlingFee);
         m_orderQuery->bindValue(12, orderInfo.remarks);
         m_orderQuery->bindValue(13, orderInfo.salesman);
+        m_orderQuery->bindValue(14, orderInfo.contractID);
         ret = m_orderQuery->exec();
         if(!ret)
         {
@@ -551,7 +553,8 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
                               "exchangeRate = :exchangeRate,"
                               "handlingFee = :handlingFee,"
                               "remarks = :remarks,"
-                              "salesman = :salesman "
+                              "salesman = :salesman,"
+                              "contractID = :contractID "
                               "where orderID = :orderID").arg(ORDER_TABLE);
         m_orderQuery->prepare(cmd);
 
@@ -569,6 +572,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(":remarks", orderInfo.remarks);
         m_orderQuery->bindValue(":salesman", orderInfo.salesman);
         m_orderQuery->bindValue(":orderID", orderInfo.orderID);
+        m_orderQuery->bindValue(":contractID", orderInfo.contractID);
 
         ret = m_orderQuery->exec();
         if (!ret) {
@@ -985,6 +989,8 @@ void SqlDatabase::getOrderInfoList(QSqlQuery* query, QList<OrderInformation>& or
         orderInfo.handlingFee = m_orderQuery->value(11).toDouble();
         orderInfo.remarks = m_orderQuery->value(12).toString();
         orderInfo.salesman = m_orderQuery->value(13).toString();
+        orderInfo.contractID = m_orderQuery->value(14).toString();
+
 
         orderInfoList.append(orderInfo);
     }
