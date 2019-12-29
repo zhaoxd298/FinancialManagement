@@ -22,7 +22,7 @@ void SearchOrderDialog::constructUI()
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按订单号" << "按客户名";
+    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
     m_searchTypeCBox->addItems(items);
 
     m_kerWordLabel = new QLabel(tr("关键字："));
@@ -99,7 +99,7 @@ void SearchOrderDialog::onOkBtn()
         ret = true;
     }
     else if ((SEARCH_BY_SALESMAN==m_searchType) ||
-             (SEARCH_BY_ORDERID ==m_searchType) ||
+             (SEARCH_BY_CONTRACTID ==m_searchType) ||
              (SEARCH_BY_CUSTOMER_NAME ==m_searchType))
     {
         m_keyWord = m_keyWordEdit->text();
@@ -135,7 +135,7 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_endDataEdit->setParent(NULL);
     }
     else if ((SEARCH_BY_SALESMAN == m_lastCbxIndex) ||
-             (SEARCH_BY_ORDERID == m_lastCbxIndex) ||
+             (SEARCH_BY_CONTRACTID == m_lastCbxIndex) ||
              (SEARCH_BY_CUSTOMER_NAME == m_lastCbxIndex))
     {
         m_gridLayout->removeWidget(m_kerWordLabel);
@@ -157,9 +157,9 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
-    else if (SEARCH_BY_ORDERID == index)
+    else if (SEARCH_BY_CONTRACTID == index)
     {
-        m_kerWordLabel->setText(tr("订单号："));
+        m_kerWordLabel->setText(tr("合同编号："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }

@@ -55,6 +55,7 @@ public:
     bool getCustomerInfoByEmail(const QString& email, QList<CustomerInformation>& customerInfoList);
     bool getCustomerInfoByPhoneNumber(const QString& phoneNumber, QList<CustomerInformation>& customerInfoList);
     bool getCustomerInfoBySalesman(const QString& salesman, QList<CustomerInformation>& customerInfoList);
+    bool getCustomerInfoByKeyword(const QString& keyword, QList<CustomerInformation>& customerInfoList);
     bool getCustomerInfoByStatus(const QString& status, QList<CustomerInformation>& customerInfoList);
 
     bool orderInfoIsExist(const QString& orderID);      // 订单信息是否存在
@@ -63,6 +64,7 @@ public:
     bool updateOrderInfo(const OrderInformation& orderInfo);
     bool getAllOrderInfo(QList<OrderInformation>& orderInfoList);
     bool getOrderInfoByOrderID(const QString& orderID, QList<OrderInformation>& orderInfoList);
+    bool getOrderInfoByContractID(const QString& contractID, QList<OrderInformation>& orderInfoList);
     bool getOrderInfoByDateRange(const QString& startDate, const QString& endDate, QList<OrderInformation>& orderInfoList);
     bool getOrderInfoBySalesman(const QString& salesman, QList<OrderInformation>& orderInfoList);
     bool getOrderInfoByCustomerName(const QString& name, QList<OrderInformation>& orderInfoList);
@@ -70,6 +72,8 @@ public:
 
     bool deleteCustomerInfo(const QString& name);
     bool deleteOrderInfo(const QString& orderID);
+    bool deleteProductInfo(int number);
+
 };
 
 #endif // COOKIESQL_H

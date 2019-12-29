@@ -68,6 +68,7 @@ private:
 
     void deleteCustomerInfo();
     void deleteOrderInfo();
+    void deleteProductInfo();
 
     void setCustomerInfo(int row, const CustomerInformation& customerInfo);
 
@@ -91,6 +92,7 @@ public:
     void updateCustomerInformation(int row, const CustomerInformation& customerInfo);
 
     void addProductInfo(const ProductInfo& productInfo);
+    void addOrderInformation(int row, const OrderInformation& orderInfo);
     void addOrderInformation(const OrderInformation& orderInfo);
     void updateOrderInformation(int row, const OrderInformation& orderInfo);
     void updateOrderStatus(const QStringList& orderList, const QString& status);
@@ -121,16 +123,16 @@ public slots:
     void onChangeOrderStatusToUnpayed();  // 修改订单状态为“未结算利润”
     void onChangeOrderStatusToPayed();  // 修改订单状态为“已结算利润”
 
-    void onCheckAll();              // CTRL+A勾选全部用户
+    void onCheckAll();                  // CTRL+A勾选全部用户
 
-    void onSearchHistoryOrder();      // 查找历史订单
-    void onNewOrder();                // 新建订单
+    void onSearchHistoryOrder();        // 查找历史订单
+    void onNewOrder();                  // 新建订单
 
-    void onExportToXls();           // 导出列表.xls
-    void onCopyToXls();             // 复制列表.xls
+    void onExportToXls();               // 导出列表.xls
+    void onCopyToXls();                 // 复制列表.xls
 
-    void onAddOneLine();            // 新增一行
-    void onDelete();      // 删除
+    void onAddOneLine();                // 新增一行
+    void onDelete();                    // 删除
 };
 
 #endif // TABLEWIDGET_H

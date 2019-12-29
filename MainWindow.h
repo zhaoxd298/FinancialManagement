@@ -44,7 +44,7 @@ public slots:
     void onSearchHistoryOrder(const QString& name);      // 查找历史订单
     void onNewOrder(const QString& name);                // 新建订单
 
-    void onChangeOrderStatus(const QStringList& orderList, const QString& status);  // 修改订单状态为“已结算利润”
+    void onChangeOrderStatus(const QStringList& orderList, const QString& status);  // 修改订单状态
 };
 
 #endif // MAINWINDOW_H

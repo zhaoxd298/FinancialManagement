@@ -223,6 +223,6 @@ void OrderDialog::onCalHandlingFeeBtn()
 
     if (ret)
     {
-        m_handlingFeeEdit->setText(QString::number(totalIncome*0.04));
+        m_handlingFeeEdit->setText(QString::number(totalIncome*0.0217));
     }
 }

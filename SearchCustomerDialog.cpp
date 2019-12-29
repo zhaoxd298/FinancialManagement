@@ -20,7 +20,7 @@ void SearchCustomerDialog::constructUI()
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-    items << "按姓名" << "按状态" << "按邮箱" << "按电话" << "按客户公司名" << "按国家" << "按询盘来源" << "按业务员";
+    items << "按姓名" << "按状态" << "按邮箱" << "按电话" << "按客户公司名" << "按国家" << "按询盘来源" << "按业务员" << "按关键字";
 
     m_searchTypeCBox->addItems(items);
 

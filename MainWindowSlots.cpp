@@ -118,32 +118,36 @@ void MainWindow::onSearchCustomerBtn()
         qDebug() << "search accepted!";
         //qDebug() << dialog.getKeyWord() << dialog.getSearchType();
         int searchType = dialog.getSearchType();
+        QString keyword = dialog.getKeyWord().trimmed();
         switch (searchType)
         {
         case SearchCustomerDialog::SearchByStatus:
             qDebug() << dialog.getKeyWord();
-            ret = m_sqlDatabase->getCustomerInfoByStatus(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByStatus(keyword, list);
             break;
         case SearchCustomerDialog::SearchByName:
-            ret = m_sqlDatabase->getCustomerInfoByName(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByName(keyword, list);
             break;
         case SearchCustomerDialog::SearchByInquirySource:
-            ret = m_sqlDatabase->getCustomerInfoByInquirySource(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByInquirySource(keyword, list);
             break;
         case SearchCustomerDialog::SearchByCountry:
-            ret = m_sqlDatabase->getCustomerInfoByCountry(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByCountry(keyword, list);
             break;
         case SearchCustomerDialog::searchByCompany:
-            ret = m_sqlDatabase->getCustomerInfoByCompany(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByCompany(keyword, list);
             break;
         case SearchCustomerDialog::SearchByEmail:
-            ret = m_sqlDatabase->getCustomerInfoByEmail(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByEmail(keyword, list);
             break;
         case SearchCustomerDialog::SearchByPhoneNumber:
-            ret = m_sqlDatabase->getCustomerInfoByPhoneNumber(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByPhoneNumber(keyword, list);
             break;
         case SearchCustomerDialog::SearchBySalesman:
-            ret = m_sqlDatabase->getCustomerInfoBySalesman(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoBySalesman(keyword, list);
+            break;
+        case SearchCustomerDialog::SearchByKeyword:
+            ret = m_sqlDatabase->getCustomerInfoByKeyword(keyword, list);
             break;
 
         default:
@@ -216,9 +220,9 @@ void MainWindow::onSearchOrderBtn()
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoBySalesman(keyword, list);
             break;
-        case SEARCH_BY_ORDERID:
+        case SEARCH_BY_CONTRACTID:
             keyword = dialog.getKeyWord();
-            ret = m_sqlDatabase->getOrderInfoByOrderID(keyword, list);
+            ret = m_sqlDatabase->getOrderInfoByContractID(keyword, list);
             break;
         case SEARCH_BY_CUSTOMER_NAME:
             keyword = dialog.getKeyWord();

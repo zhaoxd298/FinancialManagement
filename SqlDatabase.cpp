@@ -391,6 +391,47 @@ bool SqlDatabase::getCustomerInfoBySalesman(const QString& salesman, QList<Custo
     return ret;
 }
 
+bool SqlDatabase::getCustomerInfoByKeyword(const QString& keyword, QList<CustomerInformation>& customerInfoList)
+{
+    bool ret = false;
+
+    if (!m_customerQueryIsOK) {
+        return ret;
+    }
+qDebug() << "keyword:" << keyword;
+
+    QString cmd = QString("select * from %1 "
+                          "where name like '%%2%' or "
+                          "level like '%%2%' or "
+                          "status like '%%2%' or "
+                          "enterDate like '%%2%' or "
+                          "inquirySource like '%%2%' or "
+                          "background like '%%2%' or "
+                          "address like '%%2%' or "
+                          "companyName like '%%2%' or "
+                          "websit like '%%2%' or "
+                          "email like '%%2%' or "
+                          "phoneNumber like '%%2%' or "
+                          "position like '%%2%' or "
+                          "schedule like '%%2%' or "
+                          "salesman like '%%2%' or "
+                          "remarks like '%%2%'").arg(CUSTOMER_TABLE).arg(keyword);
+    ret = m_customerQuery->exec(cmd);
+    m_errorStr = m_customerQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getCustomerInfoList(m_customerQuery, customerInfoList);
+
+        if (customerInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    return ret;
+}
+
 bool SqlDatabase::getCustomerInfoByStatus(const QString& status, QList<CustomerInformation>& customerInfoList)
 {
     bool ret = false;
@@ -538,7 +579,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         return ret;
     }
 
-    if (orderInfoIsExist(orderInfo.orderID))     // 要插入的数据已经存在
+    if (orderInfoIsExist(orderInfo.orderID))     // 数据已经存在
     {
         QString cmd = QString("update %1 set "
                               "customerName = :customerName,"
@@ -584,11 +625,23 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         // update product info
         for (int i=0; i<orderInfo.productList.size(); i++)
         {
-            ret = updateProductInfo(orderInfo.productList[i]);
-            if (false == ret)
+            if (0 == orderInfo.productList[i].number)   // 插入新数据
             {
-                m_errorStr = QString("update \"%1\" error!").arg(orderInfo.productList[i].productName);
-                //qDebug() << m_errorStr;
+                ret = insertProductInfo(orderInfo.orderID, orderInfo.productList[i]);
+                if (false == ret)
+                {
+                    m_errorStr = QString("insert \"%1\" error!").arg(orderInfo.productList[i].productName);
+                    //qDebug() << m_errorStr;
+                }
+            }
+            else    // 更新数据
+            {
+                ret = updateProductInfo(orderInfo.productList[i]);
+                if (false == ret)
+                {
+                    m_errorStr = QString("update \"%1\" error!").arg(orderInfo.productList[i].productName);
+                    //qDebug() << m_errorStr;
+                }
             }
         }
     }
@@ -678,6 +731,41 @@ bool SqlDatabase::getOrderInfoByOrderID(const QString& orderID, QList<OrderInfor
     return ret;
 }
 
+bool SqlDatabase::getOrderInfoByContractID(const QString& contractID, QList<OrderInformation> &orderInfoList)
+{
+    bool ret = false;
+
+    if (!m_orderQueryIsOK) {
+        return ret;
+    }
+    orderInfoList.clear();
+
+    ret = m_orderQuery->exec(QString("select * from %1 where contractID='%2'").arg(ORDER_TABLE).arg(contractID));
+    m_errorStr = m_orderQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getOrderInfoList(m_orderQuery, orderInfoList);
+
+        if (orderInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    for (int i=0; i<orderInfoList.size(); i++)
+    {
+        if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
+        {
+            m_errorStr = "Get product list error";
+            ret = false;
+        }
+
+        //orderInfoList[i].calProfitIncomeAndExpenses();
+    }
+
+    return ret;
+}
 
 bool SqlDatabase::getOrderInfoByDateRange(const QString& startDate, const QString& endDate, QList<OrderInformation>& orderInfoList)
 {
@@ -1003,6 +1091,25 @@ bool SqlDatabase::deleteProductInfo(const QString& orderID)
     if (m_productQueryIsOK) {
         m_productQuery->prepare(QString("delete from %1 where orderID = ?").arg(PRODUCT_TABLE));
         m_productQuery->addBindValue(orderID);
+        ret = m_productQuery->exec();
+        if (!ret) {
+            m_errorStr = m_productQuery->lastError().text();
+        } else {
+            m_errorStr =  "删除产品信息成功！";
+        }
+    }
+
+    return ret;
+}
+
+
+bool SqlDatabase::deleteProductInfo(int number)
+{
+    bool ret = false;
+
+    if (m_productQueryIsOK) {
+        m_productQuery->prepare(QString("delete from %1 where number = ?").arg(PRODUCT_TABLE));
+        m_productQuery->addBindValue(number);
         ret = m_productQuery->exec();
         if (!ret) {
             m_errorStr = m_productQuery->lastError().text();
