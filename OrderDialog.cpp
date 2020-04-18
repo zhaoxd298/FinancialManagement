@@ -59,31 +59,31 @@ void OrderDialog::constructUI()
     gridLayout->addWidget(payTypeLabel, 5, 0, 1, 1);
     gridLayout->addWidget(m_payTypeCbx, 5, 1, 1, 2);
 
-    QLabel* realIncomeLabel = new QLabel(tr("实收："));
+    QLabel* realIncomeLabel = new QLabel(tr("实收(RMB)："));
     m_realIncomeEdit = new QLineEdit;
     m_realIncomeEdit->setText("0");
     gridLayout->addWidget(realIncomeLabel, 6, 0, 1, 1);
     gridLayout->addWidget(m_realIncomeEdit, 6, 1, 1, 2);
 
-    QLabel* freightCustomerLabel = new QLabel(tr("运费(客户)："));
+    QLabel* freightCustomerLabel = new QLabel(tr("运费(客户)(RMB)："));
     m_freightCustomerEdit = new QLineEdit;
     m_freightCustomerEdit->setText("0");
     gridLayout->addWidget(freightCustomerLabel, 7, 0, 1, 1);
     gridLayout->addWidget(m_freightCustomerEdit, 7, 1, 1, 2);
 
-    QLabel* freightFactoryToUsLabel = new QLabel(tr("运费(工厂→我司)："));
+    QLabel* freightFactoryToUsLabel = new QLabel(tr("运费(工厂→我司)(RMB)："));
     m_freightFactoryToUsEdit = new QLineEdit;
     m_freightFactoryToUsEdit->setText("0");
     gridLayout->addWidget(freightFactoryToUsLabel, 8, 0, 1, 1);
     gridLayout->addWidget(m_freightFactoryToUsEdit, 8, 1, 1, 2);
 
-    QLabel* freightUsToForwardingLabel = new QLabel(tr("运费(我司→货代)："));
+    QLabel* freightUsToForwardingLabel = new QLabel(tr("运费(我司→货代)(RMB)："));
     m_freightUsToForwardingEdit = new QLineEdit;
     m_freightUsToForwardingEdit->setText("0");
     gridLayout->addWidget(freightUsToForwardingLabel, 9, 0, 1, 1);
     gridLayout->addWidget(m_freightUsToForwardingEdit, 9, 1, 1, 2);
 
-    QLabel* freightForeignLabel = new QLabel(tr("运费(国外)："));
+    QLabel* freightForeignLabel = new QLabel(tr("运费(国外)(RMB)："));
     m_freightForeignEdit = new QLineEdit;
     m_freightForeignEdit->setText("0");
     gridLayout->addWidget(freightForeignLabel, 10, 0, 1, 1);
@@ -96,7 +96,7 @@ void OrderDialog::constructUI()
     gridLayout->addWidget(m_exchangeRateEdit, 11, 1, 1, 2);
 
 
-    QLabel* handlingFeeLabel = new QLabel(tr("平台手续费："));
+    QLabel* handlingFeeLabel = new QLabel(tr("平台手续费(RMB)："));
     m_handlingFeeEdit = new QLineEdit;
     m_handlingFeeEdit->setText("0");
     gridLayout->addWidget(handlingFeeLabel, 12, 0, 1, 1);
