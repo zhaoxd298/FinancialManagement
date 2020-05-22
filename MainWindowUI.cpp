@@ -3,6 +3,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include "Version.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::constructUI()
 {
-    setWindowTitle(tr("亿生财务管理系统 ") + VERSION);
+    setWindowTitle(tr(TITLE) + VERSION);
 
     m_mainWidget = new QWidget;
 

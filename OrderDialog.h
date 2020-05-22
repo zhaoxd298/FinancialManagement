@@ -10,14 +10,19 @@
 #include <QDateTimeEdit>
 #include <QDateTime>
 #include <QComboBox>
+#include <QGridLayout>
 #include "OrderInformation.h"
 #include "TableWidget.h"
+#include "Version.h"
 //
+
 
 class OrderDialog : public QDialog
 {
     Q_OBJECT
 private:
+    QGridLayout* m_gridLayout;
+
     QList<OrderInformation> m_orderInfoList;
 
     QLineEdit* m_orderIDEdit;					// 订单编号
@@ -26,6 +31,7 @@ private:
     QComboBox* m_orderStatusCbx;				// 订单状态
     QDateTimeEdit* m_payTimeEdit;				// 付款时间
     QComboBox* m_payTypeCbx;					// 付款方式
+    QLineEdit* m_otherPayTypeEdit;              // 其他付款方式
     QLineEdit* m_realIncomeEdit;                // 实收
     QLineEdit* m_handlingFeeEdit;				// 平台手续费
     QPushButton* m_calHandlingFeeBtn;           // 自动计算平台手续费
@@ -43,6 +49,20 @@ private:
 
     void constructUI();
 public:
+    enum {
+        PayByAlibaba            = 0,    // 信保
+        PayByWechat,                    // 微信
+        PayByAlipay,                    // 支付宝
+#ifdef REVI_FINANCIAL
+        PayByYiWu,                      // 义乌个体户
+#endif
+        PayByChinaUSDAccount,           // 大陆美金账户
+        PayByHKAccount,                 // 香港账户
+        PayByWesternUnion,              // 西联汇款
+        PayByPaypal,                    // Paypal
+        PayByOther                      // 其他
+    };
+public:
     OrderDialog(QWidget *parent = 0);
 
     QList<OrderInformation> getOrderList();
@@ -54,6 +74,7 @@ public slots:
     void onOKBtn();
     void onCancelBtn();
     void onCalHandlingFeeBtn();
+    void onPayTypeCbxIndexChanged(int index);
 };
 
 #endif // ADDCUSTOMERDIALOG_H

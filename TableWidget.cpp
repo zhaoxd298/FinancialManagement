@@ -111,12 +111,12 @@ void TableWidget::setDataTypeOrderInfo()
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
 
-    setColumnWidth(0, 60);
+    setColumnWidth(0, 80);
     setColumnWidth(1, 100);
-    setColumnWidth(2, 80);
-    for (int i=3; i<m_header.size(); i++)
+    //setColumnWidth(2, 80);
+    for (int i=2; i<m_header.size(); i++)
     {
-        setColumnWidth(i, 60);
+        setColumnWidth(i, 80);
     }
 
     if (NULL != mainMenu)
@@ -159,9 +159,9 @@ void TableWidget::setDataTypeProductInfo()
     setHorizontalHeaderLabels(m_header);
 
     setColumnWidth(0, 80);
-    setColumnWidth(1, 60);
-    setColumnWidth(2, 60);
-    setColumnWidth(3, 60);
+    setColumnWidth(1, 80);
+    setColumnWidth(2, 80);
+    setColumnWidth(3, 80);
     setColumnWidth(4, 80);
 
     if (NULL != mainMenu)
@@ -922,7 +922,7 @@ void TableWidget::deleteCustomerInfo()
         if (sql.deleteCustomerInfo(name))
         {
             removeRow(currentRow());
-            QMessageBox::information(this, QString(tr("提示")), QString(tr("删除客户\"%1\"信息成功！")).arg(name), QString(tr("确定")));
+            //QMessageBox::information(this, QString(tr("提示")), QString(tr("删除客户\"%1\"信息成功！")).arg(name), QString(tr("确定")));
         }
         else
         {
@@ -953,7 +953,7 @@ void TableWidget::deleteOrderInfo()
                 qDebug() << "remove:" << i;
                 removeRow(i);
             }
-            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(contractID), QString(tr("确定")));
+            //QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(contractID), QString(tr("确定")));
         }
         else
         {

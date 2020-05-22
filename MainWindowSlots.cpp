@@ -266,6 +266,7 @@ void MainWindow::onEditCustomerInfo(int row, const QString& name)
         return;
     }
 
+    dialog.setWindowTitle(tr("编辑客户资料"));
     dialog.setCustomerNameEditDisable();
     if (list.size() > 0)
     {
@@ -303,6 +304,7 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
     }
 
     OrderDialog dialog;
+    dialog.setWindowTitle(tr("编辑订单"));
     dialog.setOrderInfo(list[0]);
 
     if(dialog.exec() == QDialog::Accepted)
