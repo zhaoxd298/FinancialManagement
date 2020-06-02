@@ -94,6 +94,7 @@ public:
     void addProductInfo(const ProductInfo& productInfo);
     void addOrderInformation(int row, const OrderInformation& orderInfo);
     void addOrderInformation(const OrderInformation& orderInfo);
+    void addOrderStatistics(const OrderInformation& orderInfo);
     void updateOrderInformation(int row, const OrderInformation& orderInfo);
     void updateOrderStatus(const QStringList& orderList, const QString& status);
 

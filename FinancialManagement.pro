@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     SearchOrderDialog.cpp \
     CustomerInfoDialog.cpp \
     OrderDialog.cpp \
-    SqlDatabase.cpp
+    SqlDatabase.cpp \
+    OrderInformation.cpp
 
 HEADERS  += \
     MainWindow.h \

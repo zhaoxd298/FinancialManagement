@@ -191,6 +191,7 @@ void MainWindow::onSearchOrderBtn()
         m_tableWidget->setDataTypeOrderInfo();
 
         QList<OrderInformation> list;
+        OrderInformation::clearSumItem();
 
         int searchType = dialog.getSearchType();
         switch (searchType) {
@@ -241,6 +242,9 @@ void MainWindow::onSearchOrderBtn()
                 list[i].calProfitIncomeAndExpenses();
                 m_tableWidget->addOrderInformation(list[i]);
             }
+            //qDebug() << OrderInformation::totalProfitSum << OrderInformation::partnerProfitSum;
+            m_tableWidget->addOrderStatistics(list[0]);
+
             QMessageBox::information(this, QString(tr("提示")), QString(tr("查找到%1条订单信息，已显示在表格中！！").arg(list.size())), QString(tr("确定")));
         }
         else

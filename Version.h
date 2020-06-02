@@ -1,8 +1,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-//#define REVI_FINANCIAL
-#define EXSUN_LIGHTING_FINANCIAL
+#define REVI_FINANCIAL
+//#define EXSUN_LIGHTING_FINANCIAL
 
 #if defined(EXSUN_LIGHTING_FINANCIAL)
 #define TITLE "亿生财务管理系统 "
@@ -10,7 +10,7 @@
 #define TITLE "睿为财务管理系统 "
 #endif
 
-#define VERSION "V1.2.7"
+#define VERSION "V1.2.8"
 
 /**
  * 1.2.3
@@ -32,6 +32,10 @@
  * 2.睿为财务管理系统付款方式增加义乌个体户
  * 3.付款方式选“其他”时增加一个QLineEdit输入对应的付款方式
  * 4.删除订单信息和客户信息成功时不再弹出对话框
+
+ * 1.2.8
+ * 1.睿为不需要合伙人利润
+ * 2.增加合计功能
  *
  */
 

@@ -17,29 +17,8 @@ struct ProductInfo
     double totalIncome;          // 总收如
     double totalCost;            // 总成本
 
-    ProductInfo()
-    {
-        number = 0;
-        productName = "";
-        price = 0;
-        costPrice = 0;
-        count = 0;
-        curProfit = 0;
-        totalIncome = 0;
-        totalCost = 0;
-    }
-
-    void calProfitIncomeAndCost()
-    {
-        curProfit = (costPrice > price) * count;
-        //qDebug() << "curProfit:" << curProfit;
-
-        totalIncome = price * count;
-        //qDebug() << "totalIncome:" << totalIncome;
-
-        totalCost = costPrice * count;
-        //qDebug() << "totalCost:" << totalCost;
-    }
+    ProductInfo();
+    void calProfitIncomeAndCost();
 };
 
 struct OrderInformation
@@ -64,64 +43,24 @@ struct OrderInformation
     QString remarks;                    // 备注
     QString salesman;                   // 业务员
 
+    static double realIncomeSum;                  // 实收汇总
+    static double shouldIncomeSum;                // 应收汇总
+    static double freightCustomerSum;             // 运费(客户)汇总
+    static double freightFactoryToUsSum;          // 运费(工厂→我司)汇总
+    static double freightUsToForwardingSum;       // 运费(我司→货代)汇总
+    static double freightForeignSum;              // 运费(国外)汇总
+    static double handlingFeeSum;                 // 平台手续费汇总
+    static double tatolExpensesSum;               // 总支出汇总
+    static double totalProfitSum;                 // 总利润汇总
+    static double partnerProfitSum;               // 合伙人利润汇总
+
     QList<ProductInfo> productList;           // 商品列表
 
-    OrderInformation()
-    {
-        orderID = "";
-        customerName = "";
-        orderStatus = "";
-        payTime = "";
-        payType = "";
-        realIncome = 0;
-        shouldIncome = 0;
-        handlingFee = 0;
-        freightCustomer = 0;
-        freightFactoryToUs = 0;
-        freightUsToForwarding = 0;
-        freightForeign = 0;
-        exchangeRate = 0;
-        tatolExpenses = 0;
-        totalProfit = 0;
-        partnerProfit = 0;
-        remarks = "";
-    }
+    OrderInformation();
 
-    void calProfitIncomeAndExpenses()
-    {
-        for (int i=0; i<productList.size(); i++)
-        {
-            productList[i].calProfitIncomeAndCost();
-        }
+    void calProfitIncomeAndExpenses();
 
-        // 应收
-        shouldIncome = freightCustomer;
-        for (int i=0; i<productList.size(); i++)
-        {
-            shouldIncome += productList[i].totalIncome;
-        }
-        //qDebug() << "shouldIncome:" << shouldIncome;
-
-        // 总支出
-        tatolExpenses = handlingFee;
-        tatolExpenses += freightFactoryToUs;
-        tatolExpenses += freightUsToForwarding;
-        tatolExpenses += freightForeign;
-        //tatolExpenses += packageFee;
-        for (int i=0; i<productList.size(); i++)
-        {
-            tatolExpenses += productList[i].totalCost;
-        }
-        //qDebug() << "tatolExpenses:" << tatolExpenses;
-
-        // 总利润
-        totalProfit = realIncome - tatolExpenses;
-        //qDebug() << "totalProfit:" << totalProfit;
-
-        // 合伙人利润
-        partnerProfit = totalProfit * 0.4;
-        //qDebug() << "partnerProfit:" << partnerProfit;
-    }
+    static void clearSumItem();
 };
 
 #endif // CUSTOMERINFORMATION_H

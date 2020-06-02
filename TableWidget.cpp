@@ -4,6 +4,7 @@
 #include "SqlDatabase.h"
 #include "OrderDialog.h"
 #include "Log.h"
+#include "Version.h"
 
 #include <QClipboard>
 #include <QHeaderView>
@@ -102,11 +103,18 @@ void TableWidget::setDataTypeOrderInfo()
     m_dataType = DATA_IS_ORDER_INFO;
 
     m_header.clear();
+#if defined(EXSUN_LIGHTING_FINANCIAL)
     m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
            << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
            << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
            << "合伙人利润" << "备注";
+#elif defined(REVI_FINANCIAL)
+    m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
+           << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
+           << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
+           << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润" << "备注";
+#endif
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
@@ -333,8 +341,12 @@ void TableWidget::addOrderInformation(int row, const OrderInformation& orderInfo
     setCellData(row, 17, doubleToStr(orderInfo.handlingFee));
     setCellData(row, 18, doubleToStr(orderInfo.tatolExpenses));
     setCellData(row, 19, doubleToStr(orderInfo.totalProfit));
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
     setCellData(row, 20, doubleToStr(orderInfo.partnerProfit));
     setCellData(row, 21, orderInfo.remarks);
+#elif defined(REVI_FINANCIAL)           // 睿为没有合伙人利润
+    setCellData(row, 20, orderInfo.remarks);
+#endif
 
     m_validRowCnt++;
     for (int i=1; i<orderInfo.productList.size(); i++)
@@ -367,6 +379,31 @@ void TableWidget::addOrderInformation(int row, const OrderInformation& orderInfo
 void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
 {
     addOrderInformation(m_validRowCnt, orderInfo);
+}
+
+
+void TableWidget::addOrderStatistics(const OrderInformation& orderInfo)
+{
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt);
+
+    int row = m_validRowCnt;
+
+    setCellData(row, 0, tr("合计"));
+    setCellData(row, 10, doubleToStr(orderInfo.realIncomeSum));
+    setCellData(row, 11, doubleToStr(orderInfo.shouldIncomeSum));
+    setCellData(row, 12, doubleToStr(orderInfo.freightCustomerSum));
+    setCellData(row, 13, doubleToStr(orderInfo.freightFactoryToUsSum));
+    setCellData(row, 14, doubleToStr(orderInfo.freightUsToForwardingSum));
+    setCellData(row, 15, doubleToStr(orderInfo.freightForeignSum));
+    setCellData(row, 17, doubleToStr(orderInfo.handlingFeeSum));
+    setCellData(row, 18, doubleToStr(orderInfo.tatolExpensesSum));
+    setCellData(row, 19, doubleToStr(orderInfo.totalProfitSum));
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    setCellData(row, 20, doubleToStr(orderInfo.partnerProfitSum));
+#endif
+
+    m_validRowCnt++;
 }
 
 void TableWidget::updateOrderInformation(int row, const OrderInformation& orderInfo)
