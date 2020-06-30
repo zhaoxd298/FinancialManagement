@@ -191,20 +191,19 @@ void MainWindow::onSearchOrderBtn()
         m_tableWidget->setDataTypeOrderInfo();
 
         QList<OrderInformation> list;
-        OrderInformation::clearSumItem();
 
         int searchType = dialog.getSearchType();
         switch (searchType) {
-        case SEARCH_ALL_ORDER:     // 所有订单
+        case SearchOrderDialog::SearchAllOrder:     // 所有订单
             ret = m_sqlDatabase->getAllOrderInfo(list);
             break;
-        case SEARCH_BY_UNPAY_PROFIT:
+        case SearchOrderDialog::SearchByUnpayProfit:
             ret = m_sqlDatabase->getOrderInfoByStatus("未结算", list);
             break;
-        case SEARCH_BY_PAYED_PROFIT:
+        case SearchOrderDialog::SearchByPayedProfit:
             ret = m_sqlDatabase->getOrderInfoByStatus("已结算", list);
             break;
-        case SEARCH_BY_LAST_MONTH_ORDER:
+        case SearchOrderDialog::SearchByLastMonthOrder:
             curDate = QDate::currentDate();
             curDate = curDate.addMonths(-1);
             startDate = QDate(curDate.year(), curDate.month(),1).toString("yyyy-MM-dd");
@@ -212,24 +211,29 @@ void MainWindow::onSearchOrderBtn()
 
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case SEARCH_BY_DATE_RANGE:
+        case SearchOrderDialog::SearchByDateRange:
             startDate = dialog.getStartDate();
             endDate = dialog.getEndDate();
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case SEARCH_BY_SALESMAN:
+        case SearchOrderDialog::SearchBySalesman:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoBySalesman(keyword, list);
             break;
-        case SEARCH_BY_CONTRACTID:
+        case SearchOrderDialog::SearchByContractid:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoByContractID(keyword, list);
             break;
-        case SEARCH_BY_CUSTOMER_NAME:
+        case SearchOrderDialog::SearchByCustomerName:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoByCustomerName(keyword, list);
             break;
-
+        case SearchOrderDialog::SearchByNotShipped:
+            ret = m_sqlDatabase->getOrderInfoByStatus("待发货", list);
+            break;
+        case SearchOrderDialog::SearchByShipped:
+            ret = m_sqlDatabase->getOrderInfoByStatus("已发货", list);
+            break;
         default:
             ret = false;
             break;
@@ -243,7 +247,7 @@ void MainWindow::onSearchOrderBtn()
                 m_tableWidget->addOrderInformation(list[i]);
             }
             //qDebug() << OrderInformation::totalProfitSum << OrderInformation::partnerProfitSum;
-            m_tableWidget->addOrderStatistics(list[0]);
+            m_tableWidget->addOrderStatistics();
 
             QMessageBox::information(this, QString(tr("提示")), QString(tr("查找到%1条订单信息，已显示在表格中！！").arg(list.size())), QString(tr("确定")));
         }
@@ -321,6 +325,7 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
             if (true == m_sqlDatabase->updateOrderInfo(orderList[i]))
             {
                 m_tableWidget->updateOrderInformation(row, orderList[i]);
+                m_tableWidget->updateOrderStatistics();
                 QMessageBox::information(this, QString(tr("提示")), QString(tr("客户\"%1\"订单更新成功，具体内容显示在表格中！")).arg(orderList[i].customerName), QString(tr("确定")));
             }
             else

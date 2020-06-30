@@ -381,27 +381,72 @@ void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
     addOrderInformation(m_validRowCnt, orderInfo);
 }
 
+void TableWidget::updateOrderStatistics(int row)
+{
+    double realIncomeSum = 0;
+    double shouldIncomeSum = 0;
+    double freightCustomerSum = 0;
+    double freightFactoryToUsSum = 0;
+    double freightUsToForwardingSum = 0;
+    double freightForeignSum = 0;
+    double handlingFeeSum = 0;
+    double tatolExpensesSum = 0;
+    double totalProfitSum = 0;
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    double partnerProfitSum  = 0;
+#endif
 
-void TableWidget::addOrderStatistics(const OrderInformation& orderInfo)
+    //qDebug() << "***********row:" << row;
+
+    for (int i=0; i<row; i++)
+    {
+        realIncomeSum += itemText(i, 10).toDouble();
+        shouldIncomeSum += itemText(i, 11).toDouble();
+        freightCustomerSum += itemText(i, 12).toDouble();
+        freightFactoryToUsSum += itemText(i, 13).toDouble();
+        freightUsToForwardingSum += itemText(i, 14).toDouble();
+        freightForeignSum += itemText(i, 15).toDouble();
+        handlingFeeSum += itemText(i, 17).toDouble();
+        tatolExpensesSum += itemText(i, 18).toDouble();
+        totalProfitSum += itemText(i, 19).toDouble();
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+        partnerProfitSum += itemText(i, 20).toDouble();
+#endif
+    }
+
+    setCellData(row, 0, tr("合计"));
+    setCellData(row, 10, doubleToStr(realIncomeSum));
+    setCellData(row, 11, doubleToStr(shouldIncomeSum));
+    setCellData(row, 12, doubleToStr(freightCustomerSum));
+    setCellData(row, 13, doubleToStr(freightFactoryToUsSum));
+    setCellData(row, 14, doubleToStr(freightUsToForwardingSum));
+    setCellData(row, 15, doubleToStr(freightForeignSum));
+    setCellData(row, 17, doubleToStr(handlingFeeSum));
+    setCellData(row, 18, doubleToStr(tatolExpensesSum));
+    setCellData(row, 19, doubleToStr(totalProfitSum));
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    setCellData(row, 20, doubleToStr(partnerProfitSum));
+#endif
+}
+
+void TableWidget::updateOrderStatistics()
+{
+    for (int i=0; i<m_validRowCnt; i++)
+    {
+        if (tr("合计") == itemText(i, 0))
+        {
+            updateOrderStatistics(i);
+        }
+    }
+}
+
+void TableWidget::addOrderStatistics()
 {
     insertRow(m_validRowCnt++);
     insertRow(m_validRowCnt);
 
-    int row = m_validRowCnt;
-
-    setCellData(row, 0, tr("合计"));
-    setCellData(row, 10, doubleToStr(orderInfo.realIncomeSum));
-    setCellData(row, 11, doubleToStr(orderInfo.shouldIncomeSum));
-    setCellData(row, 12, doubleToStr(orderInfo.freightCustomerSum));
-    setCellData(row, 13, doubleToStr(orderInfo.freightFactoryToUsSum));
-    setCellData(row, 14, doubleToStr(orderInfo.freightUsToForwardingSum));
-    setCellData(row, 15, doubleToStr(orderInfo.freightForeignSum));
-    setCellData(row, 17, doubleToStr(orderInfo.handlingFeeSum));
-    setCellData(row, 18, doubleToStr(orderInfo.tatolExpensesSum));
-    setCellData(row, 19, doubleToStr(orderInfo.totalProfitSum));
-#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
-    setCellData(row, 20, doubleToStr(orderInfo.partnerProfitSum));
-#endif
+    //qDebug() << "########row:" << m_validRowCnt;
+    updateOrderStatistics(m_validRowCnt);
 
     m_validRowCnt++;
 }
@@ -420,6 +465,7 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
     {
         //qDebug() << "remove:" << i;
         removeRow(i);
+        m_validRowCnt--;
     }
 
     addOrderInformation(row, orderInfo);

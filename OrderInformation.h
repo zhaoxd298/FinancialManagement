@@ -43,24 +43,11 @@ struct OrderInformation
     QString remarks;                    // 备注
     QString salesman;                   // 业务员
 
-    static double realIncomeSum;                  // 实收汇总
-    static double shouldIncomeSum;                // 应收汇总
-    static double freightCustomerSum;             // 运费(客户)汇总
-    static double freightFactoryToUsSum;          // 运费(工厂→我司)汇总
-    static double freightUsToForwardingSum;       // 运费(我司→货代)汇总
-    static double freightForeignSum;              // 运费(国外)汇总
-    static double handlingFeeSum;                 // 平台手续费汇总
-    static double tatolExpensesSum;               // 总支出汇总
-    static double totalProfitSum;                 // 总利润汇总
-    static double partnerProfitSum;               // 合伙人利润汇总
-
     QList<ProductInfo> productList;           // 商品列表
 
     OrderInformation();
 
     void calProfitIncomeAndExpenses();
-
-    static void clearSumItem();
 };
 
 #endif // CUSTOMERINFORMATION_H

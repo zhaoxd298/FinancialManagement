@@ -1,8 +1,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define REVI_FINANCIAL
-//#define EXSUN_LIGHTING_FINANCIAL
+//#define REVI_FINANCIAL
+#define EXSUN_LIGHTING_FINANCIAL
 
 #if defined(EXSUN_LIGHTING_FINANCIAL)
 #define TITLE "亿生财务管理系统 "
@@ -10,7 +10,7 @@
 #define TITLE "睿为财务管理系统 "
 #endif
 
-#define VERSION "V1.2.8"
+#define VERSION "V1.2.9"
 
 /**
  * 1.2.3
@@ -36,7 +36,10 @@
  * 1.2.8
  * 1.睿为不需要合伙人利润
  * 2.增加合计功能
- *
+
+ * 1.2.9
+ * 1.更新“合计”功能，在编辑订单后也可以更新合计值
+ * 2.睿为查找订单对话框去掉“按未结算利润查询”和“按结算利润查询”，增加“待发货”和“已发货”选项
  */
 
 

@@ -81,40 +81,5 @@ void OrderInformation::calProfitIncomeAndExpenses()
     // 合伙人利润
     partnerProfit = totalProfit * 0.4;
     //qDebug() << "partnerProfit:" << partnerProfit;
-
-    realIncomeSum += realIncome;
-    shouldIncomeSum += shouldIncome;
-    freightCustomerSum += freightCustomer;
-    freightFactoryToUsSum += freightFactoryToUs;
-    freightUsToForwardingSum += freightUsToForwarding;
-    freightForeignSum += freightForeign;
-    handlingFeeSum += handlingFee;
-    tatolExpensesSum += tatolExpenses;
-    totalProfitSum += totalProfit;
-    partnerProfitSum += partnerProfit;
 }
 
-void OrderInformation::clearSumItem()
-{
-    realIncomeSum = 0;
-    shouldIncomeSum = 0;
-    freightCustomerSum = 0;
-    freightFactoryToUsSum = 0;
-    freightUsToForwardingSum = 0;
-    freightForeignSum = 0;
-    handlingFeeSum = 0;
-    tatolExpensesSum = 0;
-    totalProfitSum = 0;
-    partnerProfitSum = 0;
-}
-
-double OrderInformation::realIncomeSum = 0;
-double OrderInformation::shouldIncomeSum = 0;
-double OrderInformation::freightCustomerSum = 0;
-double OrderInformation::freightFactoryToUsSum = 0;
-double OrderInformation::freightUsToForwardingSum = 0;
-double OrderInformation::freightForeignSum = 0;
-double OrderInformation::handlingFeeSum = 0;
-double OrderInformation::tatolExpensesSum = 0;
-double OrderInformation::totalProfitSum = 0;
-double OrderInformation::partnerProfitSum = 0;
