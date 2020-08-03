@@ -197,6 +197,9 @@ void MainWindow::onSearchOrderBtn()
         case SearchOrderDialog::SearchAllOrder:     // 所有订单
             ret = m_sqlDatabase->getAllOrderInfo(list);
             break;
+        case SearchOrderDialog::SearchByNeedCare:
+            ret = m_sqlDatabase->getOrderInfoByStatus("需跟进", list);
+            break;
         case SearchOrderDialog::SearchByUnpayProfit:
             ret = m_sqlDatabase->getOrderInfoByStatus("未结算", list);
             break;

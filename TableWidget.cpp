@@ -1123,9 +1123,12 @@ void TableWidget::onExportToXls()           // 导出列表.xls
 
     QAxObject *range = worksheet->querySubObject("Range(const QString )", rangeStr);
     range->dynamicCall("SetValue(const QVariant&)", QVariant(allRowsData)); //存储所有数据到 excel 中,批量操作,速度极快
+    range->setProperty("RowHeight", 15); //设置单元格行高
+    //range->setProperty("ColumnWidth", 50); //设置单元格列宽
 
     // 保存为后缀为xls
-    workbook->dynamicCall("SaveAs(const QString&,int)", QDir::toNativeSeparators(filepath), 56);//保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
+    //保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
+    workbook->dynamicCall("SaveAs(const QString&,int)", QDir::toNativeSeparators(filepath), 56);
     // 保存为后缀为xlsx
     //workbook->dynamicCall("SaveAs(const QString&)", QDir::toNativeSeparators(filepath));//保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
 

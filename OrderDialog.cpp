@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QDebug>
+#include "Version.h"
 
 OrderDialog::OrderDialog(QWidget *parent)
     : QDialog(parent, Qt::WindowCloseButtonHint)
@@ -39,7 +40,7 @@ void OrderDialog::constructUI()
     QLabel* orderStatusLabel = new QLabel(tr("订单状态："));
     m_orderStatusCbx = new QComboBox;
     QStringList items;
-    items << "已付定金" << "已付全款" << "待发货" << "已发货" << "未结算利润" << "已结算利润";
+    items << "需跟进" << "已付定金" << "已付全款" << "待发货" << "已发货" << "未结算利润" << "已结算利润";
     m_orderStatusCbx->addItems(items);
     m_gridLayout->addWidget(orderStatusLabel, 3, 0, 1, 1);
     m_gridLayout->addWidget(m_orderStatusCbx, 3, 1, 1, 3);

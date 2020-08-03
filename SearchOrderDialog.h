@@ -24,7 +24,7 @@ class SearchOrderDialog : public QDialog
 private:
     QString m_keyWord;
     int m_searchType;
-    int m_lastCbxIndex;
+    int m_lastSearchType;
     QString m_startDate;
     QString m_endDate;
 
@@ -42,7 +42,7 @@ private:
     void constructUI();
     void connectSlots();
 
-    int searchTypeTextToIndex(const QString& text);
+    int searchTypeTextToType(const QString& text);
 public:
     enum {
         SearchAllOrder				= 0,
@@ -55,6 +55,7 @@ public:
         SearchByCustomerName		= 7,
         SearchByNotShipped          = 8,    // 待发货
         SearchByShipped             = 9,    // 已发货
+        SearchByNeedCare            = 10,   // 需跟进
     };
 public:
     SearchOrderDialog(QWidget *parent = 0);
@@ -66,7 +67,7 @@ public:
     QString getEndDate();
 public slots:
     void onOkBtn();
-    void onCbxIndexChanged(int index);
+    void onCbxIndexChanged(int);
 };
 
 #endif // FINDCUSTOMERDIALOG_H
