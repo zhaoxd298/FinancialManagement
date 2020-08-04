@@ -24,9 +24,9 @@ void SearchOrderDialog::constructUI()
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
 #if defined(EXSUN_LIGHTING_FINANCIAL)
-    items << "所有订单" << "需跟进" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
+    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
 #elif defined(REVI_FINANCIAL)
-    items << "所有订单" << "需跟进" << "待发货" << "已发货" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
+    items << "所有订单" << "待发货" << "已发货" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
 #endif
     m_searchTypeCBox->addItems(items);
 
@@ -114,10 +114,6 @@ int SearchOrderDialog::searchTypeTextToType(const QString& text)
     else if ("已发货" == text)
     {
         index = SearchByShipped;
-    }
-    else if ("需跟进" == text)
-    {
-        index = SearchByNeedCare;
     }
 
     return index;

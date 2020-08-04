@@ -55,7 +55,6 @@ public:
         SearchByCustomerName		= 7,
         SearchByNotShipped          = 8,    // 待发货
         SearchByShipped             = 9,    // 已发货
-        SearchByNeedCare            = 10,   // 需跟进
     };
 public:
     SearchOrderDialog(QWidget *parent = 0);

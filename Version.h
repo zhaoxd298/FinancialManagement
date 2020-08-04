@@ -1,8 +1,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-//#define REVI_FINANCIAL
-#define EXSUN_LIGHTING_FINANCIAL
+#define REVI_FINANCIAL
+//#define EXSUN_LIGHTING_FINANCIAL
 
 #if defined(EXSUN_LIGHTING_FINANCIAL)
 #define TITLE "亿生财务管理系统 "
@@ -10,7 +10,7 @@
 #define TITLE "睿为财务管理系统 "
 #endif
 
-#define VERSION "V1.3.1"
+#define VERSION "V1.3.2"
 
 /**
  * 1.2.3
@@ -46,6 +46,10 @@
 
  * 1.3.1
  * 1.订单状态增加“需跟进”
+
+ * 1.3.2
+ * 1.去掉订单状态增加“需跟进”
+ * 2.客户状态增加“需跟进”
  */
 
 

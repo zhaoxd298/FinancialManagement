@@ -31,7 +31,7 @@ void SearchCustomerDialog::constructUI()
 
     m_statusCBox = new QComboBox;
     items.clear();
-    items << "未报价" << "已报价" << "待确认" << "已成交";
+    items << "需跟进" << "未报价" << "已报价" << "待确认" << "已成交";
     m_statusCBox->addItems(items);
 
     m_gridLayout = new QGridLayout;

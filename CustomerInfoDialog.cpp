@@ -34,7 +34,7 @@ void CustomerInfoDialog::constructUI()
     QLabel* statusLabel = new QLabel(tr("状态："));
     m_statusCbx = new QComboBox;
     items.clear();
-    items << "未报价" << "已报价" << "待确认" << "已成交";
+    items << "需跟进" << "未报价" << "已报价" << "待确认" << "已成交";
     m_statusCbx->addItems(items);
     layout->addWidget(statusLabel, 2, 0, 1, 1);
     layout->addWidget(m_statusCbx, 2, 1, 1, 4);
