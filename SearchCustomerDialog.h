@@ -36,7 +36,8 @@ public:
         searchByCompany         = 4,
         SearchByCountry         = 5,
         SearchByInquirySource   = 6,
-        SearchBySalesman        = 7
+        SearchBySalesman        = 7,
+        SearchByKeyword         = 8
     };
 public:
     SearchCustomerDialog(QWidget *parent = 0);

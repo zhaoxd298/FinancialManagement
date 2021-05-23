@@ -19,11 +19,14 @@ SOURCES += main.cpp \
     MainWindowUI.cpp \
     TableWidget.cpp \
     MainWindowSlots.cpp \
-    SearchCustomerDialog.cpp \
     SearchOrderDialog.cpp \
     CustomerInfoDialog.cpp \
     OrderDialog.cpp \
-    SqlDatabase.cpp
+    SqlDatabase.cpp \
+    OrderInformation.cpp \
+    SearchCustomerDialog.cpp \
+    SearchFinancialRecordDialog.cpp \
+    FinancialRecordDialog.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -36,4 +39,7 @@ HEADERS  += \
     CustomerInfoDialog.h \
     OrderDialog.h \
     SqlDatabase.h \
-    Version.h
+    Version.h \
+    SearchFinancialRecordDialog.h \
+    FinancialRecordDialog.h \
+    FinancialRecordInfo.h

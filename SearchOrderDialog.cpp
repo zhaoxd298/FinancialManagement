@@ -5,11 +5,12 @@
 #include <QMessageBox>
 #include <QDate>
 #include <QDebug>
+#include "Version.h"
 
 SearchOrderDialog::SearchOrderDialog(QWidget *parent)
     : QDialog(parent, Qt::WindowCloseButtonHint)
 {
-    m_lastCbxIndex = 0;
+    m_lastSearchType = 0;
     constructUI();
     connectSlots();
 }
@@ -22,7 +23,11 @@ void SearchOrderDialog::constructUI()
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按订单号" << "按客户名";
+#if defined(EXSUN_LIGHTING_FINANCIAL)
+    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
+#elif defined(REVI_FINANCIAL)
+    items << "所有订单" << "待发货" << "已发货" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
+#endif
     m_searchTypeCBox->addItems(items);
 
     m_kerWordLabel = new QLabel(tr("关键字："));
@@ -66,6 +71,54 @@ void SearchOrderDialog::connectSlots()
     connect(m_searchTypeCBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCbxIndexChanged(int)));
 }
 
+int SearchOrderDialog::searchTypeTextToType(const QString& text)
+{
+    int index = -1;
+
+    if ("所有订单" == text)
+    {
+        index = SearchAllOrder;
+    }
+    else if ("未结算利润订单" == text)
+    {
+        index = SearchByUnpayProfit;
+    }
+    else if ("已结算利润订单" == text)
+    {
+        index = SearchByPayedProfit;
+    }
+    else if ("上一月订单" == text)
+    {
+        index = SearchByLastMonthOrder;
+    }
+    else if ("指定日期" == text)
+    {
+        index = SearchByDateRange;
+    }
+    else if ("按业务员" == text)
+    {
+        index = SearchBySalesman;
+    }
+    else if ("按合同编号" == text)
+    {
+        index = SearchByContractid;
+    }
+    else if ("按客户名" == text)
+    {
+        index = SearchByCustomerName;
+    }
+    else if ("待发货" == text)
+    {
+        index = SearchByNotShipped;
+    }
+    else if ("已发货" == text)
+    {
+        index = SearchByShipped;
+    }
+
+    return index;
+}
+
 QString SearchOrderDialog::getKeyWord()
 {
     return m_keyWord;
@@ -90,17 +143,17 @@ QString SearchOrderDialog::getEndDate()
 void SearchOrderDialog::onOkBtn()
 {
     bool ret = true;
-    m_searchType = m_searchTypeCBox->currentIndex();
+    m_searchType = searchTypeTextToType(m_searchTypeCBox->currentText());
 
-    if (SEARCH_BY_DATE_RANGE == m_searchType)
+    if (SearchOrderDialog::SearchByDateRange == m_searchType)
     {
         m_startDate = m_startDataEdit->text();
         m_endDate = m_endDataEdit->text();
         ret = true;
     }
-    else if ((SEARCH_BY_SALESMAN==m_searchType) ||
-             (SEARCH_BY_ORDERID ==m_searchType) ||
-             (SEARCH_BY_CUSTOMER_NAME ==m_searchType))
+    else if ((SearchOrderDialog::SearchBySalesman == m_searchType) ||
+             (SearchOrderDialog::SearchByContractid == m_searchType) ||
+             (SearchOrderDialog::SearchByCustomerName == m_searchType))
     {
         m_keyWord = m_keyWordEdit->text();
         if (m_keyWord.isEmpty())
@@ -121,9 +174,11 @@ void SearchOrderDialog::onOkBtn()
 }
 
 
-void SearchOrderDialog::onCbxIndexChanged(int index)
+void SearchOrderDialog::onCbxIndexChanged(int)
 {
-    if (SEARCH_BY_DATE_RANGE == m_lastCbxIndex)
+    int searchType = searchTypeTextToType(m_searchTypeCBox->currentText());
+
+    if (SearchOrderDialog::SearchByDateRange == m_lastSearchType)
     {
         m_gridLayout->removeWidget(m_dateRangeLabel);
         m_gridLayout->removeWidget(m_startDataEdit);
@@ -134,9 +189,9 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_connectLabel->setParent(NULL);
         m_endDataEdit->setParent(NULL);
     }
-    else if ((SEARCH_BY_SALESMAN == m_lastCbxIndex) ||
-             (SEARCH_BY_ORDERID == m_lastCbxIndex) ||
-             (SEARCH_BY_CUSTOMER_NAME == m_lastCbxIndex))
+    else if ((SearchOrderDialog::SearchBySalesman == m_lastSearchType) ||
+             (SearchOrderDialog::SearchByContractid == m_lastSearchType) ||
+             (SearchOrderDialog::SearchByCustomerName == m_lastSearchType))
     {
         m_gridLayout->removeWidget(m_kerWordLabel);
         m_gridLayout->removeWidget(m_keyWordEdit);
@@ -144,33 +199,33 @@ void SearchOrderDialog::onCbxIndexChanged(int index)
         m_keyWordEdit->setParent(NULL);
     }
 
-    if (SEARCH_BY_DATE_RANGE == index)
+    if (SearchOrderDialog::SearchByDateRange == searchType)
     {
         m_gridLayout->addWidget(m_dateRangeLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_startDataEdit, 1, 1, 1, 2);
         m_gridLayout->addWidget(m_connectLabel, 1, 3, 1, 1);
         m_gridLayout->addWidget(m_endDataEdit, 1, 4, 1, 2);
     }
-    else if (SEARCH_BY_SALESMAN == index)
+    else if (SearchOrderDialog::SearchBySalesman == searchType)
     {
         m_kerWordLabel->setText(tr("业务员："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
-    else if (SEARCH_BY_ORDERID == index)
+    else if (SearchOrderDialog::SearchByContractid == searchType)
     {
-        m_kerWordLabel->setText(tr("订单号："));
+        m_kerWordLabel->setText(tr("合同编号："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
-    else if (SEARCH_BY_CUSTOMER_NAME == index)
+    else if (SearchOrderDialog::SearchByCustomerName == searchType)
     {
         m_kerWordLabel->setText(tr("客户名："));
         m_gridLayout->addWidget(m_kerWordLabel, 1, 0, 1, 1);
         m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
     }
 
-    m_lastCbxIndex = index;
+    m_lastSearchType = searchType;
 }
 
 SearchOrderDialog::~SearchOrderDialog()

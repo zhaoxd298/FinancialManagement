@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QDebug>
+#include "Version.h"
 
 struct ProductInfo
 {
@@ -11,42 +12,24 @@ struct ProductInfo
     QString productName;         // 商品名称
     double price;                // 单价
     double costPrice;            // 成本单价
-    QString spec;                // 产品规格
     int count;                   // 数量
+    QString spec;                // 产品规格
+    QString mark;                // 唛头
+
     double curProfit;            // 利润
     double totalIncome;          // 总收如
     double totalCost;            // 总成本
 
-    ProductInfo()
-    {
-        number = 0;
-        productName = "";
-        price = 0;
-        costPrice = 0;
-        count = 0;
-        curProfit = 0;
-        totalIncome = 0;
-        totalCost = 0;
-    }
-
-    void calProfitIncomeAndCost()
-    {
-        curProfit = (costPrice > price) * count;
-        //qDebug() << "curProfit:" << curProfit;
-
-        totalIncome = price * count;
-        //qDebug() << "totalIncome:" << totalIncome;
-
-        totalCost = costPrice * count;
-        //qDebug() << "totalCost:" << totalCost;
-    }
+    ProductInfo();
+    void calProfitIncomeAndCost();
 };
 
 struct OrderInformation
 {
     QString orderID;                    // 订单编号
+    QString contractID;                 // 合同编号
     QString customerName;               // 客户
-    QString orderStatus;              // 订单状态
+    QString orderStatus;                // 订单状态
     QString payTime;                    // 付款时间
     QString payType;                    // 付款方式
     double realIncome;                  // 实收
@@ -65,62 +48,39 @@ struct OrderInformation
 
     QList<ProductInfo> productList;           // 商品列表
 
-    OrderInformation()
-    {
-        orderID = "";
-        customerName = "";
-        orderStatus = "";
-        payTime = "";
-        payType = "";
-        realIncome = 0;
-        shouldIncome = 0;
-        handlingFee = 0;
-        freightCustomer = 0;
-        freightFactoryToUs = 0;
-        freightUsToForwarding = 0;
-        freightForeign = 0;
-        exchangeRate = 0;
-        tatolExpenses = 0;
-        totalProfit = 0;
-        partnerProfit = 0;
-        remarks = "";
-    }
+    enum {
+        ContractIDColumn = 0,
+        CustomerNameColumn = 1,
+        OrderStatusColumn = 2,
+        ProductNameColumn = 3,
+        PriceColumn = 4,
+        CostPriceColumn = 5,
+        CountColumn = 6,
+        SpecColumn = 7,
+        MarkColumn = 8,
+        PayTimeColumn = 9,
+        PayTypeColumn = 10,
+        RealIncomeColumn = 11,
+        ShouldIncomeColumn = 12,
+        FreightCustomerColumn = 13,
+        FreightFactoryToUsColumn = 14,
+        FreightUsToForwardingColumn = 15,
+        FreightForeignColumn = 16,
+        ExchangeRateColumn = 17,
+        HandlingFeeColumn = 18,
+        TatolExpensesColumn = 19,
+        TotalProfitColumn = 20,
+#if defined(EXSUN_LIGHTING_FINANCIAL)
+        PartnerProfitColumn = 21,
+        RemarksColumn = 22,
+#elif defined(REVI_FINANCIAL)
+        RemarksColumn = 21,
+#endif
+    };
 
-    void calProfitIncomeAndExpenses()
-    {
-        for (int i=0; i<productList.size(); i++)
-        {
-            productList[i].calProfitIncomeAndCost();
-        }
+    OrderInformation();
 
-        // 应收
-        shouldIncome = freightCustomer;
-        for (int i=0; i<productList.size(); i++)
-        {
-            shouldIncome += productList[i].totalIncome;
-        }
-        //qDebug() << "shouldIncome:" << shouldIncome;
-
-        // 总支出
-        tatolExpenses = handlingFee;
-        tatolExpenses += freightFactoryToUs;
-        tatolExpenses += freightUsToForwarding;
-        tatolExpenses += freightForeign;
-        //tatolExpenses += packageFee;
-        for (int i=0; i<productList.size(); i++)
-        {
-            tatolExpenses += productList[i].totalCost;
-        }
-        //qDebug() << "tatolExpenses:" << tatolExpenses;
-
-        // 总利润
-        totalProfit = realIncome - tatolExpenses;
-        //qDebug() << "totalProfit:" << totalProfit;
-
-        // 合伙人利润
-        partnerProfit = totalProfit * 0.4;
-        //qDebug() << "partnerProfit:" << partnerProfit;
-    }
+    void calProfitIncomeAndExpenses();
 };
 
 #endif // CUSTOMERINFORMATION_H

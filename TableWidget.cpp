@@ -4,6 +4,7 @@
 #include "SqlDatabase.h"
 #include "OrderDialog.h"
 #include "Log.h"
+#include "Version.h"
 
 #include <QClipboard>
 #include <QHeaderView>
@@ -89,6 +90,10 @@ void TableWidget::setDataTypeCustomerInfo()
         mainMenu->addAction(m_searchHistoryOrderAction);
         mainMenu->addSeparator();
 
+        mainMenu->addAction(m_newFinancialRecordAction);
+        mainMenu->addAction(m_searchFinancialRecordAction);
+        mainMenu->addSeparator();
+
         mainMenu->addAction(m_exportToXlsAction);
         mainMenu->addAction(m_copyToXlsAction);
         mainMenu->addSeparator();
@@ -102,21 +107,28 @@ void TableWidget::setDataTypeOrderInfo()
     m_dataType = DATA_IS_ORDER_INFO;
 
     m_header.clear();
-    m_header << "订单编号" << "客户" << "订单状态" << "品名" << "单价"
-           << "成本单价" << "数量" << "规格" << "付款时间" << "付款方式" << "实收金额"
-           << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
+#if defined(EXSUN_LIGHTING_FINANCIAL)
+    m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
+           << "成本单价" << "数量" << "规格" << "唛头"<< "付款时间" << "付款方式"
+           << "实收金额" << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
            << "合伙人利润" << "备注";
+#elif defined(REVI_FINANCIAL)
+    m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
+           << "成本单价" << "数量" << "规格"  << "唛头" << "付款时间" << "付款方式"
+           << "实收金额" << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
+           << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润" << "备注";
+#endif
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
 
-    setColumnWidth(0, 60);
+    setColumnWidth(0, 80);
     setColumnWidth(1, 100);
-    setColumnWidth(2, 80);
-    for (int i=3; i<m_header.size(); i++)
+    //setColumnWidth(2, 80);
+    for (int i=2; i<m_header.size(); i++)
     {
-        setColumnWidth(i, 60);
+        setColumnWidth(i, 80);
     }
 
     if (NULL != mainMenu)
@@ -153,16 +165,15 @@ void TableWidget::setDataTypeProductInfo()
     m_dataType = DATA_IS_PRODUCT_INFO;
 
     m_header.clear();
-    m_header << "商品名称" << "单价" << "成本单价" << "数量" << "规格";
+    m_header << "商品名称" << "单价" << "成本单价" << "数量" << "规格" << "唛头";
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
 
-    setColumnWidth(0, 80);
-    setColumnWidth(1, 60);
-    setColumnWidth(2, 60);
-    setColumnWidth(3, 60);
-    setColumnWidth(4, 80);
+    for (int i=0; i<m_header.size(); i++)
+    {
+        setColumnWidth(i, 80);
+    }
 
     if (NULL != mainMenu)
     {
@@ -172,7 +183,48 @@ void TableWidget::setDataTypeProductInfo()
         mainMenu->addAction(m_deleteAction);
     }
 
-    setEditTriggers(QAbstractItemView::AllEditTriggers);
+    //setEditTriggers(QAbstractItemView::AllEditTriggers);
+    setEditTriggers(QAbstractItemView::AnyKeyPressed | QAbstractItemView::DoubleClicked);
+}
+
+
+void TableWidget::setDataTypeFinancialInfo()
+{
+    m_dataType = DATA_IS_FINANCIAL_INFO;
+
+    m_header.clear();
+    m_header << "客户" << "合同编号" << "收支" << "金额" << "付款时间" << "付款方式" << "备注";
+    m_validClumnCnt = m_header.size();
+    setColumnCount(m_header.size());
+    setHorizontalHeaderLabels(m_header);
+
+    for (int i=0; i<m_header.size(); i++)
+    {
+        setColumnWidth(i, 80);
+    }
+
+    if (NULL != mainMenu)
+    {
+        mainMenu->clear(); //清除原有菜单
+        mainMenu->addSeparator();
+
+        m_editAction->setText(tr("编辑"));
+        mainMenu->addAction(m_editAction);
+
+        m_deleteAction->setText(tr("删除"));
+        mainMenu->addAction(m_deleteAction);
+        mainMenu->addSeparator();
+
+        mainMenu->addAction(m_copyAction);
+        mainMenu->addAction(m_checkAllAction);
+        mainMenu->addSeparator();
+
+        mainMenu->addAction(m_exportToXlsAction);
+        mainMenu->addAction(m_copyToXlsAction);
+        mainMenu->addSeparator();
+    }
+
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void TableWidget::setCustomerInfo(int row, const CustomerInformation& customerInfo)
@@ -231,7 +283,7 @@ bool TableWidget::getSelectedOrderIDList(QStringList &orderList)
     {
         for (int row=rangeList[i].topRow(); row<=rangeList[i].bottomRow(); row++)
         {
-            QString orderID = itemText(row, 0);
+            QString orderID = itemStrData(row, 0);
             QString status = itemText(row, 2);
             if ((!orderID.isEmpty()) && (!status.isEmpty()))
             {
@@ -292,69 +344,157 @@ void TableWidget::addProductInfo(const ProductInfo& productInfo)
     setCellData(m_validRowCnt, 2, QString::number(productInfo.costPrice));
     setCellData(m_validRowCnt, 3, QString::number(productInfo.count));
     setCellData(m_validRowCnt, 4, productInfo.spec);
+    setCellData(m_validRowCnt, 5, productInfo.mark);
 
     setItemData(m_validRowCnt, 0, productInfo.number);
 
     m_validRowCnt++;
 }
 
-void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
+void TableWidget::addOrderInformation(int row, const OrderInformation& orderInfo)
 {
     if (orderInfo.productList.size() <= 0)
     {
         return;
     }
 
-    int startRowCnt = m_validRowCnt;
-    insertRow(m_validRowCnt);
+    int startRowCnt = row;
+    int endRowCnt = row;
+    insertRow(row);
 
-    setCellData(m_validRowCnt, 0, orderInfo.orderID);
-    setCellData(m_validRowCnt, 1, orderInfo.customerName);
-    setCellData(m_validRowCnt, 2, orderInfo.orderStatus);
-    setCellData(m_validRowCnt, 3, orderInfo.productList[0].productName);
-    setCellData(m_validRowCnt, 4, doubleToStr(orderInfo.productList[0].price));
-    setCellData(m_validRowCnt, 5, doubleToStr(orderInfo.productList[0].costPrice));
-    setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[0].count));
-    setCellData(m_validRowCnt, 7, orderInfo.productList[0].spec);
-    setCellData(m_validRowCnt, 8, orderInfo.payTime);
-    setCellData(m_validRowCnt, 9, orderInfo.payType);
-    setCellData(m_validRowCnt, 10, doubleToStr(orderInfo.realIncome));
-    setCellData(m_validRowCnt, 11, doubleToStr(orderInfo.shouldIncome));
-    setCellData(m_validRowCnt, 12, doubleToStr(orderInfo.freightCustomer));
-    setCellData(m_validRowCnt, 13, doubleToStr(orderInfo.freightFactoryToUs));
-    setCellData(m_validRowCnt, 14, doubleToStr(orderInfo.freightUsToForwarding));
-    setCellData(m_validRowCnt, 15, doubleToStr(orderInfo.freightForeign));
-    setCellData(m_validRowCnt, 16, doubleToStr(orderInfo.exchangeRate));
-    setCellData(m_validRowCnt, 17, doubleToStr(orderInfo.handlingFee));
-    setCellData(m_validRowCnt, 18, doubleToStr(orderInfo.tatolExpenses));
-    setCellData(m_validRowCnt, 19, doubleToStr(orderInfo.totalProfit));
-    setCellData(m_validRowCnt, 20, doubleToStr(orderInfo.partnerProfit));
-    setCellData(m_validRowCnt, 21, orderInfo.remarks);
+    setCellData(row, orderInfo.ContractIDColumn, orderInfo.contractID);
+    setItemStrData(row, orderInfo.ContractIDColumn, orderInfo.orderID);
+    setItemData(row, orderInfo.ContractIDColumn, orderInfo.productList.size());
+
+    setCellData(row, orderInfo.CustomerNameColumn, orderInfo.customerName);
+    setCellData(row, orderInfo.OrderStatusColumn, orderInfo.orderStatus);
+    setCellData(row, orderInfo.ProductNameColumn, orderInfo.productList[0].productName);
+    setCellData(row, orderInfo.PriceColumn, doubleToStr(orderInfo.productList[0].price));
+    setCellData(row, orderInfo.CostPriceColumn, doubleToStr(orderInfo.productList[0].costPrice));
+    setCellData(row, orderInfo.CountColumn, QString::number(orderInfo.productList[0].count));
+    setCellData(row, orderInfo.SpecColumn, orderInfo.productList[0].spec);
+    setCellData(row, orderInfo.MarkColumn, orderInfo.productList[0].mark);
+    setCellData(row, orderInfo.PayTimeColumn, orderInfo.payTime);
+    setCellData(row, orderInfo.PayTypeColumn, orderInfo.payType);
+    setCellData(row, orderInfo.RealIncomeColumn, doubleToStr(orderInfo.realIncome));
+    setCellData(row, orderInfo.ShouldIncomeColumn, doubleToStr(orderInfo.shouldIncome));
+    setCellData(row, orderInfo.FreightCustomerColumn, doubleToStr(orderInfo.freightCustomer));
+    setCellData(row, orderInfo.FreightFactoryToUsColumn, doubleToStr(orderInfo.freightFactoryToUs));
+    setCellData(row, orderInfo.FreightUsToForwardingColumn, doubleToStr(orderInfo.freightUsToForwarding));
+    setCellData(row, orderInfo.FreightForeignColumn, doubleToStr(orderInfo.freightForeign));
+    setCellData(row, orderInfo.ExchangeRateColumn, doubleToStr(orderInfo.exchangeRate));
+    setCellData(row, orderInfo.HandlingFeeColumn, doubleToStr(orderInfo.handlingFee));
+    setCellData(row, orderInfo.TatolExpensesColumn, doubleToStr(orderInfo.tatolExpenses));
+    setCellData(row, orderInfo.TotalProfitColumn, doubleToStr(orderInfo.totalProfit));
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    setCellData(row, orderInfo.PartnerProfitColumn, doubleToStr(orderInfo.partnerProfit));
+    setCellData(row, orderInfo.RemarksColumn, orderInfo.remarks);
+#elif defined(REVI_FINANCIAL)           // 睿为没有合伙人利润
+    setCellData(row, orderInfo.RemarksColumn, orderInfo.remarks);
+#endif
 
     m_validRowCnt++;
     for (int i=1; i<orderInfo.productList.size(); i++)
     {
-        setCellData(m_validRowCnt, 3, orderInfo.productList[i].productName);
-        setCellData(m_validRowCnt, 4, doubleToStr(orderInfo.productList[i].price));
-        setCellData(m_validRowCnt, 5, doubleToStr(orderInfo.productList[i].costPrice));
-        setCellData(m_validRowCnt, 6, QString::number(orderInfo.productList[i].count));
-        setCellData(m_validRowCnt, 7, orderInfo.productList[i].spec);
+        insertRow(row+i);
+        setCellData(row+i, orderInfo.ProductNameColumn, orderInfo.productList[i].productName);
+        setCellData(row+i, orderInfo.PriceColumn, doubleToStr(orderInfo.productList[i].price));
+        setCellData(row+i, orderInfo.CostPriceColumn, doubleToStr(orderInfo.productList[i].costPrice));
+        setCellData(row+i, orderInfo.CountColumn, QString::number(orderInfo.productList[i].count));
+        setCellData(row+i, orderInfo.SpecColumn, orderInfo.productList[i].spec);
+        setCellData(row+i, orderInfo.MarkColumn, orderInfo.productList[i].mark);
         m_validRowCnt++;
+        endRowCnt = row + i;
     }
 
     int productCnt = orderInfo.productList.size();
-    if (m_validRowCnt-startRowCnt > 1)
+    if (endRowCnt-startRowCnt >= 1)
     {
         for (int i=0; i<3; i++)
         {
             setSpan(startRowCnt, i, productCnt, 1);
         }
 
-        for (int i=8; i<m_validClumnCnt; i++)
+        for (int i=9; i<m_validClumnCnt; i++)
         {
             setSpan(startRowCnt, i, productCnt, 1);
         }
     }
+}
+
+void TableWidget::addOrderInformation(const OrderInformation& orderInfo)
+{
+    addOrderInformation(m_validRowCnt, orderInfo);
+}
+
+void TableWidget::updateOrderStatistics(int row)
+{
+    double realIncomeSum = 0;
+    double shouldIncomeSum = 0;
+    double freightCustomerSum = 0;
+    double freightFactoryToUsSum = 0;
+    double freightUsToForwardingSum = 0;
+    double freightForeignSum = 0;
+    double handlingFeeSum = 0;
+    double tatolExpensesSum = 0;
+    double totalProfitSum = 0;
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    double partnerProfitSum  = 0;
+#endif
+
+    //qDebug() << "***********row:" << row;
+
+    for (int i=0; i<row; i++)
+    {
+        realIncomeSum += itemText(i, 11).toDouble();
+        shouldIncomeSum += itemText(i, 12).toDouble();
+        freightCustomerSum += itemText(i, 13).toDouble();
+        freightFactoryToUsSum += itemText(i, 14).toDouble();
+        freightUsToForwardingSum += itemText(i, 15).toDouble();
+        freightForeignSum += itemText(i, 16).toDouble();
+        handlingFeeSum += itemText(i, 18).toDouble();
+        tatolExpensesSum += itemText(i, 19).toDouble();
+        totalProfitSum += itemText(i, 20).toDouble();
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+        partnerProfitSum += itemText(i, 21).toDouble();
+#endif
+    }
+
+    setCellData(row, 0, tr("合计"));
+    setCellData(row, 11, doubleToStr(realIncomeSum));
+    setCellData(row, 12, doubleToStr(shouldIncomeSum));
+    setCellData(row, 13, doubleToStr(freightCustomerSum));
+    setCellData(row, 14, doubleToStr(freightFactoryToUsSum));
+    setCellData(row, 15, doubleToStr(freightUsToForwardingSum));
+    setCellData(row, 16, doubleToStr(freightForeignSum));
+    setCellData(row, 18, doubleToStr(handlingFeeSum));
+    setCellData(row, 19, doubleToStr(tatolExpensesSum));
+    setCellData(row, 20, doubleToStr(totalProfitSum));
+#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
+    setCellData(row, 21, doubleToStr(partnerProfitSum));
+#endif
+}
+
+void TableWidget::updateOrderStatistics()
+{
+    for (int i=0; i<m_validRowCnt; i++)
+    {
+        if (tr("合计") == itemText(i, 0))
+        {
+            updateOrderStatistics(i);
+        }
+    }
+}
+
+void TableWidget::addOrderStatistics()
+{
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt);
+
+    //qDebug() << "########row:" << m_validRowCnt;
+    updateOrderStatistics(m_validRowCnt);
+
+    m_validRowCnt++;
 }
 
 void TableWidget::updateOrderInformation(int row, const OrderInformation& orderInfo)
@@ -364,37 +504,17 @@ void TableWidget::updateOrderInformation(int row, const OrderInformation& orderI
         return;
     }
 
-    //setCellData(m_validRowCnt, 0, orderInfo.orderID);
-    setCellData(row, 1, orderInfo.customerName);
-    setCellData(row, 2, orderInfo.orderStatus);
-    setCellData(row, 3, orderInfo.productList[0].productName);
-    setCellData(row, 4, doubleToStr(orderInfo.productList[0].price));
-    setCellData(row, 5, doubleToStr(orderInfo.productList[0].costPrice));
-    setCellData(row, 6, QString::number(orderInfo.productList[0].count));
-    setCellData(row, 7, orderInfo.productList[0].spec);
-    setCellData(row, 8, orderInfo.payTime);
-    setCellData(row, 9, orderInfo.payType);
-    setCellData(row, 10, doubleToStr(orderInfo.realIncome));
-    setCellData(row, 11, doubleToStr(orderInfo.shouldIncome));
-    setCellData(row, 12, doubleToStr(orderInfo.freightCustomer));
-    setCellData(row, 13, doubleToStr(orderInfo.freightFactoryToUs));
-    setCellData(row, 14, doubleToStr(orderInfo.freightUsToForwarding));
-    setCellData(row, 15, doubleToStr(orderInfo.freightForeign));
-    setCellData(row, 16, doubleToStr(orderInfo.exchangeRate));
-    setCellData(row, 17, doubleToStr(orderInfo.handlingFee));
-    setCellData(row, 18, doubleToStr(orderInfo.tatolExpenses));
-    setCellData(row, 19, doubleToStr(orderInfo.totalProfit));
-    setCellData(row, 20, doubleToStr(orderInfo.partnerProfit));
-    setCellData(row, 21, orderInfo.remarks);
+    int productCnt = itemData(row, 0);
+    //qDebug() << "row:" << row << "productCnt:" << productCnt;
 
-    for (int i=1; i<orderInfo.productList.size(); i++)
+    for (int i=row+productCnt-1; i>=row; i--)
     {
-        setCellData(row+i, 3, orderInfo.productList[i].productName);
-        setCellData(row+i, 4, doubleToStr(orderInfo.productList[i].price));
-        setCellData(row+i, 5, doubleToStr(orderInfo.productList[i].costPrice));
-        setCellData(row+i, 6, QString::number(orderInfo.productList[i].count));
-        setCellData(row+i, 7, orderInfo.productList[i].spec);
+        //qDebug() << "remove:" << i;
+        removeRow(i);
+        m_validRowCnt--;
     }
+
+    addOrderInformation(row, orderInfo);
 }
 
 void TableWidget::updateOrderStatus(const QStringList& orderList, const QString& status)
@@ -403,7 +523,7 @@ void TableWidget::updateOrderStatus(const QStringList& orderList, const QString&
     {
         for (int row=0; row<m_validRowCnt; row++)
         {
-            if (orderList[i] == itemText(row, 0))
+            if (orderList[i] == itemStrData(row, 0))
             {
                 setCellData(row, 2, status);
             }
@@ -428,7 +548,9 @@ QList<ProductInfo> TableWidget::getProductList()
             product.costPrice = itemText(i, 2).toDouble(&costPriceOk);
             product.count = itemText(i, 3).toLong(&countOk);
             product.spec = itemText(i, 4);
+            product.mark = itemText(i, 5);
 
+            //qDebug() << "mark:" << product.mark;
             if (product.productName.isEmpty() ||
                 false == priceOk ||
                 false == costPriceOk ||
@@ -449,16 +571,109 @@ bool TableWidget::setItemData(int row, int column, int data)
     QTableWidgetItem* it = item(row, column);
     if (NULL != it) {
         it->setData(Qt::UserRole+1, QVariant(data));
-        //it->setData(Qt::DisplayRole, QVariant(data));
         return true;
     }
 
     return false;
 }
 
+void TableWidget::setFinancialInfo(int row, const FinancialRecordInfo& financialInfo)
+{
+    setCellData(row, 0, financialInfo.customerName);
+    setCellData(row, 1, financialInfo.contractID);
+    setCellData(row, 2, financialInfo.type);
+    setCellData(row, 3, doubleToStr(financialInfo.amount));
+    setCellData(row, 4, financialInfo.payTime);
+    setCellData(row, 5, financialInfo.payType);
+    setCellData(row, 6, financialInfo.remarks);
+
+    setItemData(row, 0, financialInfo.number);
+}
+
+void TableWidget::addFinancialInfo(const FinancialRecordInfo& financialInfo)
+{
+    if (DATA_IS_FINANCIAL_INFO != m_dataType)
+    {
+        return;
+    }
+
+    insertRow(m_validRowCnt);
+
+    setFinancialInfo(m_validRowCnt, financialInfo);
+
+    m_validRowCnt++;
+}
+
+void TableWidget::updateFinancialInfo(int row, const FinancialRecordInfo& financialInfo)
+{
+    if ((row < 0) || (row > m_validRowCnt))
+    {
+        return;
+    }
+
+    setFinancialInfo(row, financialInfo);
+}
+
+void TableWidget::addFinancialStatistics()
+{
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt++);
+    insertRow(m_validRowCnt);
+
+    updateFinancialStatistics(m_validRowCnt-3);
+
+    m_validRowCnt++;
+}
+
+void TableWidget::updateFinancialStatistics()
+{
+    for (int i=0; i<m_validRowCnt; i++)
+    {
+        if (tr("总收入") == itemText(i, 0))
+        {
+            updateFinancialStatistics(i);
+        }
+    }
+}
+
+void TableWidget::updateFinancialStatistics(int row)
+{
+    double totalIncome = 0;
+    double totaloutlay = 0;
+    double remain = 0;
+
+    for (int i=0; i<row; i++)
+    {
+        QString type = itemText(i, 2);
+        double amount = itemText(i, 3).toDouble();
+
+        if (tr("收入") == type)
+        {
+            totalIncome += amount;
+        }
+        else if (tr("支出") == type)
+        {
+            totaloutlay += amount;
+        }
+    }
+
+    remain = totalIncome - totaloutlay;
+
+    setCellData(row, 0, tr("总收入"));
+    setCellData(row, 1, doubleToStr(totalIncome));
+
+    setCellData(row+1, 0, tr("总支出"));
+    setCellData(row+1, 1, doubleToStr(totaloutlay));
+
+    setCellData(row+2, 0, tr("结余"));
+    setCellData(row+2, 1, doubleToStr(remain));
+}
+
 int TableWidget::itemData(int row, int column)
 {
-    int data = 0;
+    int data = -1;
 
     QTableWidgetItem* it = item(row, column);
     if (NULL != it) {
@@ -466,6 +681,29 @@ int TableWidget::itemData(int row, int column)
     }
 
     return data;
+}
+
+bool TableWidget::setItemStrData(int row, int column, QString str)
+{
+    QTableWidgetItem* it = item(row, column);
+    if (NULL != it) {
+        it->setData(Qt::UserRole+2, QVariant(str.toLatin1()));
+        return true;
+    }
+
+    return false;
+}
+
+QString TableWidget::itemStrData(int row, int column)
+{
+    QString str = "";
+
+    QTableWidgetItem* it = item(row, column);
+    if (NULL != it) {
+        str = it->data(Qt::UserRole+2).toString();
+    }
+
+    return str;
 }
 
 QString TableWidget::itemText(int row, int column)
@@ -581,6 +819,11 @@ void TableWidget::createActions()
 
     m_addProductAction = new QAction(tr("新增一行"), this);
     connect(m_addProductAction, SIGNAL(triggered(bool)), this, SLOT(onAddOneLine()));
+
+    m_newFinancialRecordAction = new QAction(tr("新增收支记录"), this);
+    connect(m_newFinancialRecordAction, SIGNAL(triggered(bool)), this, SLOT(onNewFinancialRecordAction()));
+    m_searchFinancialRecordAction = new QAction(tr("查找收支记录"), this);;
+    connect(m_searchFinancialRecordAction, SIGNAL(triggered(bool)), this, SLOT(onSearchFinancialRecordAction()));
 
     mainMenu->clear(); //清除原有菜单
     mainMenu->addSeparator();
@@ -730,6 +973,10 @@ void TableWidget::onEdit()                  // 编辑
     {
         editOrderInfo();
     }
+    else if (DATA_IS_FINANCIAL_INFO == m_dataType)
+    {
+        editFinancialInfo();
+    }
 }
 
 void TableWidget::onCopy()
@@ -791,9 +1038,9 @@ void TableWidget::onChangeOrderStatusToPayed()
 void TableWidget::onCheckAll()              // CTRL+A勾选全部用户
 {
     //for (int i=0; i<rowCount(); i++) {
-    for (int i=0; i<m_validRowCnt; i++) {
+    /*for (int i=0; i<m_validRowCnt; i++) {
         item(i, 0)->setCheckState(Qt::Checked);
-    }
+    }*/
     selectAll();
 }
 
@@ -884,7 +1131,7 @@ void TableWidget::editCustomerInfo()
 
 void TableWidget::editOrderInfo()
 {
-    QString orderID = itemText(currentRow(), 0);
+    QString orderID = itemStrData(currentRow(), 0);
     if (orderID.isEmpty())
     {
         QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取订单编号失败失败！")), QString(tr("确定")));
@@ -892,6 +1139,18 @@ void TableWidget::editOrderInfo()
     }
 
     emit sigEditOrderInfo(currentRow(), orderID);
+}
+
+void TableWidget::editFinancialInfo()
+{
+    int number = itemData(currentRow(), 0);
+    if (number < 0)
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取收支记录编号失败失败！")), QString(tr("确定")));
+        return;
+    }
+
+    emit sigEditFinancialInfo(currentRow(), number);
 }
 
 void TableWidget::deleteCustomerInfo()
@@ -909,7 +1168,7 @@ void TableWidget::deleteCustomerInfo()
         if (sql.deleteCustomerInfo(name))
         {
             removeRow(currentRow());
-            QMessageBox::information(this, QString(tr("提示")), QString(tr("删除客户\"%1\"信息成功！")).arg(name), QString(tr("确定")));
+            //QMessageBox::information(this, QString(tr("提示")), QString(tr("删除客户\"%1\"信息成功！")).arg(name), QString(tr("确定")));
         }
         else
         {
@@ -920,7 +1179,8 @@ void TableWidget::deleteCustomerInfo()
 
 void TableWidget::deleteOrderInfo()
 {
-    QString orderID = itemText(currentRow(), 0);
+    QString orderID = itemStrData(currentRow(), 0);
+    QString contractID = itemText(currentRow(), 0);
     if (orderID.isEmpty())
     {
         QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取订单号失败！")), QString(tr("确定")));
@@ -939,13 +1199,46 @@ void TableWidget::deleteOrderInfo()
                 qDebug() << "remove:" << i;
                 removeRow(i);
             }
-            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(orderID), QString(tr("确定")));
+            //QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"删除成功！")).arg(contractID), QString(tr("确定")));
         }
         else
         {
-            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"删除失败:%2")).arg(orderID).arg(sql.getErrorStr()), QString(tr("确定")));
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"删除失败:%2")).arg(contractID).arg(sql.getErrorStr()), QString(tr("确定")));
         }
     }
+}
+
+void TableWidget::deleteProductInfo()
+{
+    int row = currentRow();
+    int number = itemData(row, 0);
+    QString name = itemText(row, 0);
+
+    qDebug() << number;
+
+    SqlDatabase sql("delete");
+    if (false == sql.deleteProductInfo(number))
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("产品\"%1\"删除失败:%2")).arg(name).arg(sql.getErrorStr()), QString(tr("确定")));
+    }
+
+    removeRow(row);
+}
+
+void TableWidget::deleteFinancialInfo()
+{
+    int row = currentRow();
+    int number = itemData(row, 0);
+
+    qDebug() << number;
+
+    SqlDatabase sql("delete");
+    if (false == sql.deleteFinacialInfo(number))
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("收支记录\"%1\"删除失败:%2")).arg(number).arg(sql.getErrorStr()), QString(tr("确定")));
+    }
+
+    removeRow(row);
 }
 
 void TableWidget::onExportToXls()           // 导出列表.xls
@@ -1009,9 +1302,12 @@ void TableWidget::onExportToXls()           // 导出列表.xls
 
     QAxObject *range = worksheet->querySubObject("Range(const QString )", rangeStr);
     range->dynamicCall("SetValue(const QVariant&)", QVariant(allRowsData)); //存储所有数据到 excel 中,批量操作,速度极快
+    range->setProperty("RowHeight", 15); //设置单元格行高
+    //range->setProperty("ColumnWidth", 50); //设置单元格列宽
 
     // 保存为后缀为xls
-    workbook->dynamicCall("SaveAs(const QString&,int)", QDir::toNativeSeparators(filepath), 56);//保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
+    //保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
+    workbook->dynamicCall("SaveAs(const QString&,int)", QDir::toNativeSeparators(filepath), 56);
     // 保存为后缀为xlsx
     //workbook->dynamicCall("SaveAs(const QString&)", QDir::toNativeSeparators(filepath));//保存至filepath，注意一定要用QDir::toNativeSeparators将路径中的"/"转换为"\"，不然一定保存不了。
 
@@ -1056,7 +1352,7 @@ void TableWidget::onAddOneLine()            // 新增一行
 
 }
 
-void TableWidget::onDelete()      // 删除当前产品
+void TableWidget::onDelete()      // 删除
 {
     if (DATA_IS_CUSTOMER_INFO == m_dataType)
     {
@@ -1068,6 +1364,34 @@ void TableWidget::onDelete()      // 删除当前产品
     }
     else if (DATA_IS_PRODUCT_INFO == m_dataType)
     {
-        removeRow(currentRow());
+        deleteProductInfo();
     }
+    else if (DATA_IS_FINANCIAL_INFO == m_dataType)
+    {
+        deleteFinancialInfo();
+    }
+}
+
+void TableWidget::onNewFinancialRecordAction()  // 新增收支记录
+{
+    QString name = itemText(currentRow(), 0);
+    if (name.isEmpty())
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+        return;
+    }
+
+    emit sigNewFinancialRecord(name);
+}
+
+void TableWidget::onSearchFinancialRecordAction()   // 查找收支记录
+{
+    QString name = itemText(currentRow(), 0);
+    if (name.isEmpty())
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+        return;
+    }
+
+    emit sigSearchFinancialByCustomerName(name);
 }

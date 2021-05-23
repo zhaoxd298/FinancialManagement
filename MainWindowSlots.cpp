@@ -4,6 +4,8 @@
 #include "SearchCustomerDialog.h"
 #include "OrderDialog.h"
 #include "SearchOrderDialog.h"
+#include "FinancialRecordDialog.h"
+#include "SearchFinancialRecordDialog.h"
 #include <QMessageBox>
 #include <QDebug>
 #include <QDate>
@@ -49,15 +51,110 @@ bool MainWindow::addNewOrder(const QString& customerName)
     return ret;
 }
 
+
+bool MainWindow::addNewFinancialRecord(const QString& customerName)
+{
+    bool ret = false;
+    FinancialRecordDialog dialog;
+
+    if (!customerName.isEmpty())
+    {
+        dialog.setCustomerName(customerName);
+        dialog.disableCustomerNameEdit();
+    }
+
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        qDebug() << "add order accepted!";
+        m_tableWidget->clear();
+        m_tableWidget->setDataTypeFinancialInfo();
+
+        FinancialRecordInfo info = dialog.getFinancialRecordInfo();
+
+        /*qDebug() << "addNewFinancialRecord()";
+        qDebug() << info.number;
+        qDebug() << info.contractID;
+        qDebug() << info.customerName;
+        qDebug() << info.type;
+        qDebug() << info.amount;
+        qDebug() << info.payTime;
+        qDebug() << info.payType;
+        qDebug() << info.remarks;
+        */
+
+        if (true == m_sqlDatabase->insertFinacialInfo(info))
+        {
+            ret = true;
+            m_tableWidget->addFinancialInfo(info);
+            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"收支记录添加成功，具体内容显示在表格中！")).arg(info.contractID), QString(tr("确定")));
+        }
+        else
+        {
+            ret = false;
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"收支记录添加失败！:%2")).arg(info.contractID).arg(m_sqlDatabase->getErrorStr()), QString(tr("确定")));
+        }
+    }
+    else
+    {
+        ret = false;
+        qDebug() << "add financial record reject!";
+    }
+
+    return ret;
+}
+
+void MainWindow::searchFinancialRecord(int type, const QString& keyword)
+{
+    bool ret = false;
+    QList<FinancialRecordInfo> list;
+
+    m_tableWidget->clear();
+    m_tableWidget->setDataTypeFinancialInfo();
+
+    switch (type)
+    {
+    case SearchFinancialRecordDialog::SearchByCustomerName:
+        ret = m_sqlDatabase->getFinacialInfoByCustomerName(keyword, list);
+        break;
+    case SearchFinancialRecordDialog::SearchByContractID:
+        ret = m_sqlDatabase->getFinacialInfoByContractID(keyword, list);
+        break;
+    default:
+        break;
+    }
+
+    if (ret && list.size()>0)
+    {
+        for (int i=0; i<list.size(); i++)
+        {
+            m_tableWidget->addFinancialInfo(list[i]);
+        }
+
+        m_tableWidget->addFinancialStatistics();
+        QMessageBox::information(this, QString(tr("提示")), QString(tr("查找到%1条交易记录信息，已显示在表格中！")).arg(list.size()), QString(tr("确定")));
+    }
+    else
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("没有找到相关的交易记录信息！")), QString(tr("确定")));
+    }
+}
+
 void MainWindow::connectSlots()
 {
     connect(m_addCustomerBtn, SIGNAL(clicked(bool)), this, SLOT(onAddCustomerBtn()));
     connect(m_searchCustomerBtn, SIGNAL(clicked(bool)), this, SLOT(onSearchCustomerBtn()));
+
     connect(m_addOrderBtn, SIGNAL(clicked(bool)), this, SLOT(onAddOrderBtn()));
     connect(m_searchOrderBtn, SIGNAL(clicked(bool)), this, SLOT(onSearchOrderBtn()));
 
+    connect(m_addFinancialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onAddFinancialRecord()));
+    connect(m_searchFinancialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onSearchFinancialRecordBtn()));
+    connect(m_tableWidget, SIGNAL(sigNewFinancialRecord(QString)), this, SLOT(onAddFinancialRecord(QString)));
+    connect(m_tableWidget, SIGNAL(sigSearchFinancialByCustomerName(QString)), this, SLOT(onSearchFinancialByCustomerName(QString)));
+
     connect(m_tableWidget, SIGNAL(sigEditCustomerInfo(int, QString)), this, SLOT(onEditCustomerInfo(int, QString)));
     connect(m_tableWidget, SIGNAL(sigEditOrderInfo(int, QString)), this, SLOT(onEditOrderInfo(int, QString)));
+    connect(m_tableWidget, SIGNAL(sigEditFinancialInfo(int,int)), this, SLOT(onEditFinancialInfo(int,int)));
 
     connect(m_tableWidget, SIGNAL(sigNewOrder(QString)), this, SLOT(onNewOrder(QString)));
     connect(m_tableWidget, SIGNAL(sigSearchHistoryOrder(QString)), this, SLOT(onSearchHistoryOrder(QString)));
@@ -118,32 +215,36 @@ void MainWindow::onSearchCustomerBtn()
         qDebug() << "search accepted!";
         //qDebug() << dialog.getKeyWord() << dialog.getSearchType();
         int searchType = dialog.getSearchType();
+        QString keyword = dialog.getKeyWord().trimmed();
         switch (searchType)
         {
         case SearchCustomerDialog::SearchByStatus:
             qDebug() << dialog.getKeyWord();
-            ret = m_sqlDatabase->getCustomerInfoByStatus(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByStatus(keyword, list);
             break;
         case SearchCustomerDialog::SearchByName:
-            ret = m_sqlDatabase->getCustomerInfoByName(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByName(keyword, list);
             break;
         case SearchCustomerDialog::SearchByInquirySource:
-            ret = m_sqlDatabase->getCustomerInfoByInquirySource(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByInquirySource(keyword, list);
             break;
         case SearchCustomerDialog::SearchByCountry:
-            ret = m_sqlDatabase->getCustomerInfoByCountry(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByCountry(keyword, list);
             break;
         case SearchCustomerDialog::searchByCompany:
-            ret = m_sqlDatabase->getCustomerInfoByCompany(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByCompany(keyword, list);
             break;
         case SearchCustomerDialog::SearchByEmail:
-            ret = m_sqlDatabase->getCustomerInfoByEmail(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByEmail(keyword, list);
             break;
         case SearchCustomerDialog::SearchByPhoneNumber:
-            ret = m_sqlDatabase->getCustomerInfoByPhoneNumber(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoByPhoneNumber(keyword, list);
             break;
         case SearchCustomerDialog::SearchBySalesman:
-            ret = m_sqlDatabase->getCustomerInfoBySalesman(dialog.getKeyWord(), list);
+            ret = m_sqlDatabase->getCustomerInfoBySalesman(keyword, list);
+            break;
+        case SearchCustomerDialog::SearchByKeyword:
+            ret = m_sqlDatabase->getCustomerInfoByKeyword(keyword, list);
             break;
 
         default:
@@ -190,16 +291,16 @@ void MainWindow::onSearchOrderBtn()
 
         int searchType = dialog.getSearchType();
         switch (searchType) {
-        case SEARCH_ALL_ORDER:     // 所有订单
+        case SearchOrderDialog::SearchAllOrder:     // 所有订单
             ret = m_sqlDatabase->getAllOrderInfo(list);
             break;
-        case SEARCH_BY_UNPAY_PROFIT:
+        case SearchOrderDialog::SearchByUnpayProfit:
             ret = m_sqlDatabase->getOrderInfoByStatus("未结算", list);
             break;
-        case SEARCH_BY_PAYED_PROFIT:
+        case SearchOrderDialog::SearchByPayedProfit:
             ret = m_sqlDatabase->getOrderInfoByStatus("已结算", list);
             break;
-        case SEARCH_BY_LAST_MONTH_ORDER:
+        case SearchOrderDialog::SearchByLastMonthOrder:
             curDate = QDate::currentDate();
             curDate = curDate.addMonths(-1);
             startDate = QDate(curDate.year(), curDate.month(),1).toString("yyyy-MM-dd");
@@ -207,24 +308,29 @@ void MainWindow::onSearchOrderBtn()
 
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case SEARCH_BY_DATE_RANGE:
+        case SearchOrderDialog::SearchByDateRange:
             startDate = dialog.getStartDate();
             endDate = dialog.getEndDate();
             ret = m_sqlDatabase->getOrderInfoByDateRange(startDate, endDate, list);
             break;
-        case SEARCH_BY_SALESMAN:
+        case SearchOrderDialog::SearchBySalesman:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoBySalesman(keyword, list);
             break;
-        case SEARCH_BY_ORDERID:
+        case SearchOrderDialog::SearchByContractid:
             keyword = dialog.getKeyWord();
-            ret = m_sqlDatabase->getOrderInfoByOrderID(keyword, list);
+            ret = m_sqlDatabase->getOrderInfoByContractID(keyword, list);
             break;
-        case SEARCH_BY_CUSTOMER_NAME:
+        case SearchOrderDialog::SearchByCustomerName:
             keyword = dialog.getKeyWord();
             ret = m_sqlDatabase->getOrderInfoByCustomerName(keyword, list);
             break;
-
+        case SearchOrderDialog::SearchByNotShipped:
+            ret = m_sqlDatabase->getOrderInfoByStatus("待发货", list);
+            break;
+        case SearchOrderDialog::SearchByShipped:
+            ret = m_sqlDatabase->getOrderInfoByStatus("已发货", list);
+            break;
         default:
             ret = false;
             break;
@@ -237,6 +343,9 @@ void MainWindow::onSearchOrderBtn()
                 list[i].calProfitIncomeAndExpenses();
                 m_tableWidget->addOrderInformation(list[i]);
             }
+            //qDebug() << OrderInformation::totalProfitSum << OrderInformation::partnerProfitSum;
+            m_tableWidget->addOrderStatistics();
+
             QMessageBox::information(this, QString(tr("提示")), QString(tr("查找到%1条订单信息，已显示在表格中！！").arg(list.size())), QString(tr("确定")));
         }
         else
@@ -247,6 +356,64 @@ void MainWindow::onSearchOrderBtn()
     else
     {
         qDebug() << "search order reject!";
+    }
+}
+
+
+void MainWindow::onAddFinancialRecord(const QString& name)
+{
+    addNewFinancialRecord(name);
+}
+
+void MainWindow::onSearchFinancialRecordBtn()
+{
+    SearchFinancialRecordDialog dialog;    
+
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        int searchType = dialog.getSearchType();
+        QString keyword = dialog.getKeyWord();
+
+        searchFinancialRecord(searchType, keyword);
+    }
+}
+
+void MainWindow::onSearchFinancialByCustomerName(const QString& name)
+{
+    searchFinancialRecord(SearchFinancialRecordDialog::SearchByCustomerName, name);
+}
+
+void MainWindow::onEditFinancialInfo(int row, int number)
+{
+    qDebug() << "onEditFinancialInfo" << row << number;
+    QList<FinancialRecordInfo> list;
+
+    if (false == m_sqlDatabase->getFinacialInfoByNumber(number, list))
+    {
+        QMessageBox::critical(this, QString(tr("错误")), QString(tr("从数据库中读取记录\"%1\"失败！")).arg(number), QString(tr("确定")));
+        return;
+    }
+
+    FinancialRecordDialog dialog;
+    dialog.setWindowTitle(tr("编辑收支记录"));
+    dialog.setFinancialRecordInfo(list[0]);
+
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        //qDebug() << "edit order accepted!";
+
+        FinancialRecordInfo info = dialog.getFinancialRecordInfo();
+        info.number = number;
+        if (true == m_sqlDatabase->updateFinacialInfo(info))
+        {
+            m_tableWidget->updateFinancialInfo(row, info);
+            m_tableWidget->updateFinancialStatistics();
+            QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"收支记录更新成功，具体内容显示在表格中！")).arg(info.contractID), QString(tr("确定")));
+        }
+        else
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"收支记录更新失败:%2")).arg(info.contractID).arg(m_sqlDatabase->getErrorStr()), QString(tr("确定")));
+        }
     }
 }
 
@@ -262,10 +429,22 @@ void MainWindow::onEditCustomerInfo(int row, const QString& name)
         return;
     }
 
+    dialog.setWindowTitle(tr("编辑客户资料"));
     dialog.setCustomerNameEditDisable();
     if (list.size() > 0)
     {
-        dialog.setCustomerInfomation(list[0]);
+        for (int i=0; i<list.size(); i++)
+        {
+            if (name == list[i].name)
+            {
+                dialog.setCustomerInfomation(list[i]);
+            }
+            else
+            {
+                QMessageBox::critical(this, QString(tr("错误")), QString(tr("数据库中未找到客户\"%1\"信息！")).arg(name), QString(tr("确定")));
+                return;
+            }
+        }
     }
 
     if(dialog.exec() == QDialog::Accepted)
@@ -289,7 +468,7 @@ void MainWindow::onEditCustomerInfo(int row, const QString& name)
 
 void MainWindow::onEditOrderInfo(int row, const QString& orderID)
 {
-    qDebug() << row << orderID;
+    //qDebug() << row << orderID;
     QList<OrderInformation> list;
 
     if (false == m_sqlDatabase->getOrderInfoByOrderID(orderID, list))
@@ -299,6 +478,7 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
     }
 
     OrderDialog dialog;
+    dialog.setWindowTitle(tr("编辑订单"));
     dialog.setOrderInfo(list[0]);
 
     if(dialog.exec() == QDialog::Accepted)
@@ -311,6 +491,7 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
             if (true == m_sqlDatabase->updateOrderInfo(orderList[i]))
             {
                 m_tableWidget->updateOrderInformation(row, orderList[i]);
+                m_tableWidget->updateOrderStatistics();
                 QMessageBox::information(this, QString(tr("提示")), QString(tr("客户\"%1\"订单更新成功，具体内容显示在表格中！")).arg(orderList[i].customerName), QString(tr("确定")));
             }
             else

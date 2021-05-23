@@ -13,6 +13,7 @@
 
 #include "CustomerInformation.h"
 #include "OrderInformation.h"
+#include "FinancialRecordInfo.h"
 
 class TableWidget : public QTableWidget
 {
@@ -30,6 +31,9 @@ private:
     QAction* m_changeOrderStatusToPayedAction;
     QAction* m_checkAllAction;
 
+    QAction* m_newFinancialRecordAction;     // 新增收支记录
+    QAction* m_searchFinancialRecordAction;  // 查找收支记录
+
     QAction* m_searchHistoryOrderAction;      // 查找历史订单
     QAction* m_newOrderAction;                // 新建订单
 
@@ -43,11 +47,16 @@ private:
     enum data_type {
         DATA_IS_CUSTOMER_INFO,
         DATA_IS_ORDER_INFO,
-        DATA_IS_PRODUCT_INFO
+        DATA_IS_PRODUCT_INFO,
+        DATA_IS_FINANCIAL_INFO
     } m_dataType;
 private:
     bool setItemData(int row, int column, int data);
     int itemData(int row, int column);
+
+    bool setItemStrData(int row, int column, QString str);
+    QString itemStrData(int row, int column);
+
     QString itemText(int row, int column);
 
     bool productIsEmpty(int row);           // 当前行商品编号是否为空
@@ -61,11 +70,15 @@ private:
 
     void editCustomerInfo();
     void editOrderInfo();
+    void editFinancialInfo();
 
     void deleteCustomerInfo();
     void deleteOrderInfo();
+    void deleteProductInfo();
+    void deleteFinancialInfo();
 
     void setCustomerInfo(int row, const CustomerInformation& customerInfo);
+    void setFinancialInfo(int row, const FinancialRecordInfo& financialInfo);
 
     QString doubleToStr(double d);
 
@@ -81,17 +94,27 @@ public:
     void setDataTypeCustomerInfo();
     void setDataTypeOrderInfo();
     void setDataTypeProductInfo();
+    void setDataTypeFinancialInfo();
 
     void setTableHeader(const QStringList& header);
     void addCustomerInformation(const CustomerInformation& customerInfo);
     void updateCustomerInformation(int row, const CustomerInformation& customerInfo);
 
     void addProductInfo(const ProductInfo& productInfo);
+    void addOrderInformation(int row, const OrderInformation& orderInfo);
     void addOrderInformation(const OrderInformation& orderInfo);
+    void updateOrderStatistics(int row);
+    void updateOrderStatistics();
+    void addOrderStatistics();
     void updateOrderInformation(int row, const OrderInformation& orderInfo);
     void updateOrderStatus(const QStringList& orderList, const QString& status);
-
     QList<ProductInfo> getProductList();
+
+    void addFinancialInfo(const FinancialRecordInfo& financialInfo);
+    void updateFinancialInfo(int row, const FinancialRecordInfo& financialInfo);
+    void addFinancialStatistics();
+    void updateFinancialStatistics();
+    void updateFinancialStatistics(int row);
 
     QJsonArray saveCfg();
     void loadCfg(const QJsonArray& array);
@@ -102,11 +125,15 @@ public:
 signals:
     void sigEditCustomerInfo(int row, const QString& name);
     void sigEditOrderInfo(int row, const QString& orderID);
+    void sigEditFinancialInfo(int row, int number);
 
     void sigSearchHistoryOrder(const QString& name);
     void sigNewOrder(const QString& name);
 
     void sigChangeOrderStatus(const QStringList& orderList, const QString& status);
+
+    void sigNewFinancialRecord(const QString& name);
+    void sigSearchFinancialByCustomerName(const QString& name);
 
 public slots:
     void onHeaderClicked(int i);    // 单击表头槽函数
@@ -117,16 +144,19 @@ public slots:
     void onChangeOrderStatusToUnpayed();  // 修改订单状态为“未结算利润”
     void onChangeOrderStatusToPayed();  // 修改订单状态为“已结算利润”
 
-    void onCheckAll();              // CTRL+A勾选全部用户
+    void onCheckAll();                  // CTRL+A勾选全部用户
 
-    void onSearchHistoryOrder();      // 查找历史订单
-    void onNewOrder();                // 新建订单
+    void onSearchHistoryOrder();        // 查找历史订单
+    void onNewOrder();                  // 新建订单
 
-    void onExportToXls();           // 导出列表.xls
-    void onCopyToXls();             // 复制列表.xls
+    void onExportToXls();               // 导出列表.xls
+    void onCopyToXls();                 // 复制列表.xls
 
-    void onAddOneLine();            // 新增一行
-    void onDelete();      // 删除
+    void onAddOneLine();                // 新增一行
+    void onDelete();                    // 删除
+
+    void onNewFinancialRecordAction();  // 新增收支记录
+    void onSearchFinancialRecordAction();   // 查找收支记录
 };
 
 #endif // TABLEWIDGET_H

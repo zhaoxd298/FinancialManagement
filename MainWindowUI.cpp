@@ -3,6 +3,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include "Version.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::constructUI()
 {
-    setWindowTitle(tr("亿生财务管理系统 ") + VERSION);
+    setWindowTitle(tr(TITLE) + VERSION);
 
     m_mainWidget = new QWidget;
 
@@ -34,9 +35,18 @@ void MainWindow::constructUI()
     orderManagerLayout->addWidget(m_searchOrderBtn);
     orderManagerGBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
+    QGroupBox* financialRecordGBox = new QGroupBox(tr("收支记录"));
+    m_addFinancialRecordBtn = new QPushButton(tr("新增记录"));
+    m_searchFinancialRecordBtn = new QPushButton(tr("查找记录"));
+    QVBoxLayout* financialRecordLayout = new QVBoxLayout(financialRecordGBox);
+    financialRecordLayout->addWidget(m_addFinancialRecordBtn);
+    financialRecordLayout->addWidget(m_searchFinancialRecordBtn);
+    financialRecordGBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
     QHBoxLayout* menuHLayout = new QHBoxLayout;
     menuHLayout->addWidget(customerManagerGBox);
     menuHLayout->addWidget(orderManagerGBox);
+    menuHLayout->addWidget(financialRecordGBox);
     menuHLayout->addStretch();
 
     m_tableWidget = new TableWidget;

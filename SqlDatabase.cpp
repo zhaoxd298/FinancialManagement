@@ -25,6 +25,7 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
 
     int count = 0;
 
+    // 创建客户信息表
     m_customerQuery = new QSqlQuery(QSqlDatabase::database(connectionName));
     bool ret = m_customerQuery->exec(QString("select count(*) from sqlite_master where type='table' and name='%1'").arg(CUSTOMER_TABLE));    //关键的判断
     if (ret) {
@@ -54,7 +55,7 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
         m_customerQueryIsOK = true;
     }
 
-
+    // 创建订单信息表
     m_orderQuery = new QSqlQuery(QSqlDatabase::database(connectionName));
     ret = m_orderQuery->exec(QString("select count(*) from sqlite_master where type='table' and name='%1'").arg(ORDER_TABLE));    //关键的判断
     if (ret) {
@@ -76,13 +77,15 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "exchangeRate DOUBLE,"
                                   "handlingFee DOUBLE,"
                                   "remarks varchar,"
-                                  "salesman varchar)").arg(ORDER_TABLE);
+                                  "salesman varchar,"
+                                  "contractID varchar)").arg(ORDER_TABLE);
         m_orderQueryIsOK = m_orderQuery->exec(cmd);
         m_errorStr = m_orderQuery->lastError().text();
     } else {
         m_orderQueryIsOK = true;
     }
 
+    // 创建产品信息表
     m_productQuery = new QSqlQuery(QSqlDatabase::database(connectionName));
     ret = m_productQuery->exec(QString("select count(*) from sqlite_master where type='table' and name='%1'").arg(PRODUCT_TABLE));    //关键的判断
     if (ret) {
@@ -98,12 +101,38 @@ SqlDatabase::SqlDatabase(const QString &connectionName)
                                   "price DOUBLE,"
                                   "costPrice DOUBLE,"
                                   "count INT,"
-                                  "spec varchar)").arg(PRODUCT_TABLE);
+                                  "spec varchar,"
+                                  "mark varchar)").arg(PRODUCT_TABLE);
         m_productQueryIsOK = m_productQuery->exec(cmd);
         m_errorStr = m_productQuery->lastError().text();
         qDebug() << m_errorStr;
     } else {
         m_productQueryIsOK = true;
+    }
+
+    // 创建收支记录表
+    m_financialQuery = new QSqlQuery(QSqlDatabase::database(connectionName));
+    ret = m_financialQuery->exec(QString("select count(*) from sqlite_master where type='table' and name='%1'").arg(FINANCIAL_TABLE));    //关键的判断
+    if (ret) {
+        while (m_financialQuery->next()) {
+            count = m_financialQuery->value(0).toString().toInt();
+        }
+    }
+    if (0 == count) {
+        QString cmd = QString("create table %1("
+                                  "number INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                  "contractID varchar,"
+                                  "customerName varchar,"
+                                  "type varchar,"
+                                  "amount DOUBLE,"
+                                  "payTime varchar,"
+                                  "payType varchar,"
+                                  "remarks varchar)").arg(FINANCIAL_TABLE);
+        m_financialQueryIsOK = m_financialQuery->exec(cmd);
+        m_errorStr = m_financialQuery->lastError().text();
+        qDebug() << m_errorStr;
+    } else {
+        m_financialQueryIsOK = true;
     }
 
     //qDebug() << m_customerQueryIsOK << m_orderQueryIsOK << m_productQueryIsOK;
@@ -390,6 +419,46 @@ bool SqlDatabase::getCustomerInfoBySalesman(const QString& salesman, QList<Custo
     return ret;
 }
 
+bool SqlDatabase::getCustomerInfoByKeyword(const QString& keyword, QList<CustomerInformation>& customerInfoList)
+{
+    bool ret = false;
+
+    if (!m_customerQueryIsOK) {
+        return ret;
+    }
+
+    QString cmd = QString("select * from %1 "
+                          "where name like '%%2%' or "
+                          "level like '%%2%' or "
+                          "status like '%%2%' or "
+                          "enterDate like '%%2%' or "
+                          "inquirySource like '%%2%' or "
+                          "background like '%%2%' or "
+                          "address like '%%2%' or "
+                          "companyName like '%%2%' or "
+                          "websit like '%%2%' or "
+                          "email like '%%2%' or "
+                          "phoneNumber like '%%2%' or "
+                          "position like '%%2%' or "
+                          "schedule like '%%2%' or "
+                          "salesman like '%%2%' or "
+                          "remarks like '%%2%'").arg(CUSTOMER_TABLE).arg(keyword);
+    ret = m_customerQuery->exec(cmd);
+    m_errorStr = m_customerQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getCustomerInfoList(m_customerQuery, customerInfoList);
+
+        if (customerInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    return ret;
+}
+
 bool SqlDatabase::getCustomerInfoByStatus(const QString& status, QList<CustomerInformation>& customerInfoList)
 {
     bool ret = false;
@@ -446,7 +515,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
     }
     else    // 插入数据
     {
-        m_orderQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(ORDER_TABLE));
+        m_orderQuery->prepare(QString("insert into %1 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").arg(ORDER_TABLE));
 
         m_orderQuery->bindValue(0, orderInfo.orderID);
         m_orderQuery->bindValue(1, orderInfo.customerName);
@@ -462,6 +531,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(11, orderInfo.handlingFee);
         m_orderQuery->bindValue(12, orderInfo.remarks);
         m_orderQuery->bindValue(13, orderInfo.salesman);
+        m_orderQuery->bindValue(14, orderInfo.contractID);
         ret = m_orderQuery->exec();
         if(!ret)
         {
@@ -472,7 +542,7 @@ bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
 
         for (int i=0; i<orderInfo.productList.size(); i++)
         {
-            qDebug() << i;
+            //qDebug() << i;
             ret = insertProductInfo(orderInfo.orderID, orderInfo.productList[i]);
             if (false == ret)
             {
@@ -536,7 +606,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         return ret;
     }
 
-    if (orderInfoIsExist(orderInfo.orderID))     // 要插入的数据已经存在
+    if (orderInfoIsExist(orderInfo.orderID))     // 数据已经存在
     {
         QString cmd = QString("update %1 set "
                               "customerName = :customerName,"
@@ -551,7 +621,8 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
                               "exchangeRate = :exchangeRate,"
                               "handlingFee = :handlingFee,"
                               "remarks = :remarks,"
-                              "salesman = :salesman "
+                              "salesman = :salesman,"
+                              "contractID = :contractID "
                               "where orderID = :orderID").arg(ORDER_TABLE);
         m_orderQuery->prepare(cmd);
 
@@ -569,6 +640,7 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         m_orderQuery->bindValue(":remarks", orderInfo.remarks);
         m_orderQuery->bindValue(":salesman", orderInfo.salesman);
         m_orderQuery->bindValue(":orderID", orderInfo.orderID);
+        m_orderQuery->bindValue(":contractID", orderInfo.contractID);
 
         ret = m_orderQuery->exec();
         if (!ret) {
@@ -580,11 +652,23 @@ bool SqlDatabase::updateOrderInfo(const OrderInformation& orderInfo)
         // update product info
         for (int i=0; i<orderInfo.productList.size(); i++)
         {
-            ret = updateProductInfo(orderInfo.productList[i]);
-            if (false == ret)
+            if (0 == orderInfo.productList[i].number)   // 插入新数据
             {
-                m_errorStr = QString("update \"%1\" error!").arg(orderInfo.productList[i].productName);
-                //qDebug() << m_errorStr;
+                ret = insertProductInfo(orderInfo.orderID, orderInfo.productList[i]);
+                if (false == ret)
+                {
+                    m_errorStr = QString("insert \"%1\" error!").arg(orderInfo.productList[i].productName);
+                    //qDebug() << m_errorStr;
+                }
+            }
+            else    // 更新数据
+            {
+                ret = updateProductInfo(orderInfo.productList[i]);
+                if (false == ret)
+                {
+                    m_errorStr = QString("update \"%1\" error!").arg(orderInfo.productList[i].productName);
+                    //qDebug() << m_errorStr;
+                }
             }
         }
     }
@@ -674,6 +758,41 @@ bool SqlDatabase::getOrderInfoByOrderID(const QString& orderID, QList<OrderInfor
     return ret;
 }
 
+bool SqlDatabase::getOrderInfoByContractID(const QString& contractID, QList<OrderInformation> &orderInfoList)
+{
+    bool ret = false;
+
+    if (!m_orderQueryIsOK) {
+        return ret;
+    }
+    orderInfoList.clear();
+
+    ret = m_orderQuery->exec(QString("select * from %1 where contractID='%2'").arg(ORDER_TABLE).arg(contractID));
+    m_errorStr = m_orderQuery->lastError().text();
+
+    if (true == ret)
+    {
+        getOrderInfoList(m_orderQuery, orderInfoList);
+
+        if (orderInfoList.isEmpty())
+        {
+            ret = false;
+        }
+    }
+
+    for (int i=0; i<orderInfoList.size(); i++)
+    {
+        if (false == getProductInfoByOrderID(orderInfoList[i].orderID, orderInfoList[i].productList))
+        {
+            m_errorStr = "Get product list error";
+            ret = false;
+        }
+
+        //orderInfoList[i].calProfitIncomeAndExpenses();
+    }
+
+    return ret;
+}
 
 bool SqlDatabase::getOrderInfoByDateRange(const QString& startDate, const QString& endDate, QList<OrderInformation>& orderInfoList)
 {
@@ -828,6 +947,250 @@ bool SqlDatabase::getOrderInfoByStatus(const QString& status, QList<OrderInforma
     return ret;
 }
 
+bool SqlDatabase::finacialInfoIsExist(int number)
+{
+    int count = 0;
+
+    if (m_financialQueryIsOK) {
+        QString cmd = QString("select count(*) from %1 where number=%2").arg(FINANCIAL_TABLE).arg(number);
+        //qDebug() << cmd;
+        m_financialQuery->exec(cmd);
+       // m_errorStr = m_productQuery->lastError().text();
+        //qDebug() << m_errorStr;
+        while (m_financialQuery->next()) {
+            count = m_financialQuery->value(0).toString().toInt();
+        }
+    }
+    else
+    {
+        qDebug() << "<finacialInfoIsExist> m_financialQueryIsOK:" << m_financialQueryIsOK;
+    }
+
+    return (0 != count) ? true : false;
+}
+
+bool SqlDatabase::insertFinacialInfo(FinancialRecordInfo& finacialInfo)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        return ret;
+    }
+
+    QString cmd = QString("insert into %1 (contractID,customerName,type,amount,payTime,payType,remarks) "
+                          "VALUES('%2', '%3', '%4', %5, '%6', '%7', '%8')").arg(FINANCIAL_TABLE).\
+                          arg(finacialInfo.contractID).arg(finacialInfo.customerName).arg(finacialInfo.type).\
+                          arg(finacialInfo.amount).arg(finacialInfo.payTime).arg(finacialInfo.payType).\
+                          arg(finacialInfo.remarks);
+    ret = m_financialQuery->exec(cmd);
+    //qDebug() << cmd;
+    if(!ret)
+    {
+        m_errorStr = m_financialQuery->lastError().text();
+        //qDebug() << m_errorStr;
+    } else {
+        m_errorStr = "插入数据成功！";
+    }
+
+    ret = getFinancialInfoMaxNumber(finacialInfo.number);
+
+    return ret;
+}
+
+bool SqlDatabase::updateFinacialInfo(const FinancialRecordInfo& finacialInfo)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK)
+    {
+        qDebug() << "m_productQueryIsOK:" << m_financialQueryIsOK;
+        return ret;
+    }
+
+    if (finacialInfoIsExist(finacialInfo.number))
+    {
+        QString cmd = QString("update %1 set "
+                              "contractID = :contractID,"
+                              "customerName = :customerName,"
+                              "type = :type,"
+                              "amount = :amount,"
+                              "payTime = :payTime,"
+                              "payType = :payType,"
+                              "remarks = :remarks "
+                              "where number = :number").arg(FINANCIAL_TABLE);
+        m_financialQuery->prepare(cmd);
+
+        m_financialQuery->bindValue(":contractID", finacialInfo.contractID);
+        m_financialQuery->bindValue(":customerName", finacialInfo.customerName);
+        m_financialQuery->bindValue(":type", finacialInfo.type);
+        m_financialQuery->bindValue(":amount", finacialInfo.amount);
+        m_financialQuery->bindValue(":payTime", finacialInfo.payTime);
+        m_financialQuery->bindValue(":payType", finacialInfo.payType);
+        m_financialQuery->bindValue(":remarks", finacialInfo.remarks);
+        m_financialQuery->bindValue(":number", finacialInfo.number);
+
+        ret = m_financialQuery->exec();
+        if (!ret) {
+            m_errorStr = "更新数据失败：" + m_financialQuery->lastError().text();
+            qDebug() << m_errorStr;
+        } else {
+            m_errorStr = "更新记录成功！";
+        }
+    }
+    else
+    {
+        m_errorStr = "<updateFinacialInfo> data is not exist!";
+        qDebug() << m_errorStr;
+        ret = false;
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getFinacialInfoByNumber(int number, QList<FinancialRecordInfo>& financialRecordInfoList)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        qDebug() << "<getFinacialInfoBycontractID> m_financialQueryIsOK:" << m_financialQueryIsOK;
+        return ret;
+    }
+
+    ret = m_financialQuery->exec(QString("select * from %1 where number=%2").arg(FINANCIAL_TABLE).arg(number));
+    m_errorStr = m_financialQuery->lastError().text();
+
+    financialRecordInfoList.clear();
+
+    while (m_financialQuery->next()) {
+        FinancialRecordInfo info;
+
+        info.number = m_financialQuery->value(0).toInt();
+        info.contractID = m_financialQuery->value(1).toString();
+        info.customerName = m_financialQuery->value(2).toString();
+        info.type = m_financialQuery->value(3).toString();
+        info.amount = m_financialQuery->value(4).toDouble(&ret);
+        info.payTime = m_financialQuery->value(5).toString();
+        info.payType = m_financialQuery->value(6).toString();
+        info.remarks = m_financialQuery->value(7).toString();
+
+        financialRecordInfoList.append(info);
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getFinacialInfoByContractID(const QString& contractID, QList<FinancialRecordInfo>& financialRecordInfoList)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        qDebug() << "<getFinacialInfoBycontractID> m_financialQueryIsOK:" << m_financialQueryIsOK;
+        return ret;
+    }
+
+    ret = m_financialQuery->exec(QString("select * from %1 where contractID='%2'").arg(FINANCIAL_TABLE).arg(contractID));
+    m_errorStr = m_financialQuery->lastError().text();
+
+    financialRecordInfoList.clear();
+
+    while (m_financialQuery->next()) {
+        FinancialRecordInfo info;
+
+        info.number = m_financialQuery->value(0).toInt();
+        info.contractID = m_financialQuery->value(1).toString();
+        info.customerName = m_financialQuery->value(2).toString();
+        info.type = m_financialQuery->value(3).toString();
+        info.amount = m_financialQuery->value(4).toDouble(&ret);
+        info.payTime = m_financialQuery->value(5).toString();
+        info.payType = m_financialQuery->value(6).toString();
+        info.remarks = m_financialQuery->value(7).toString();
+
+        financialRecordInfoList.append(info);
+    }
+
+    return ret;
+}
+
+
+bool SqlDatabase::getFinacialInfoByCustomerName(const QString& name, QList<FinancialRecordInfo>& financialRecordInfoList)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        qDebug() << "<getFinacialInfoBycontractID> m_financialQueryIsOK:" << m_financialQueryIsOK;
+        return ret;
+    }
+
+    ret = m_financialQuery->exec(QString("select * from %1 where customerName like '%%2%'").arg(FINANCIAL_TABLE).arg(name));
+    m_errorStr = m_financialQuery->lastError().text();
+
+    financialRecordInfoList.clear();
+
+    while (m_financialQuery->next()) {
+        FinancialRecordInfo info;
+
+        info.number = m_financialQuery->value(0).toInt();
+        info.contractID = m_financialQuery->value(1).toString();
+        info.customerName = m_financialQuery->value(2).toString();
+        info.type = m_financialQuery->value(3).toString();
+        info.amount = m_financialQuery->value(4).toDouble(&ret);
+        info.payTime = m_financialQuery->value(5).toString();
+        info.payType = m_financialQuery->value(6).toString();
+        info.remarks = m_financialQuery->value(7).toString();
+
+        financialRecordInfoList.append(info);
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getCustomerNameByContractID(const QString& contractID, QStringList& nameList)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        qDebug() << "<getCustomerNameByContractID> m_financialQueryIsOK:" << m_financialQueryIsOK;
+        return ret;
+    }
+
+    ret = m_financialQuery->exec(QString("select customerName from %1 where contractID='%2'").arg(FINANCIAL_TABLE).arg(contractID));
+    m_errorStr = m_financialQuery->lastError().text();
+
+    nameList.clear();
+
+    while (m_financialQuery->next()) {
+
+        nameList.append(m_financialQuery->value(0).toString());
+    }
+
+    if (nameList.size() <= 0)
+    {
+        ret = false;
+    }
+
+    return ret;
+}
+
+bool SqlDatabase::getFinancialInfoMaxNumber(int& number)
+{
+    bool ret = false;
+
+    if (!m_financialQueryIsOK) {
+        return ret;
+    }
+
+    ret = m_financialQuery->exec(QString("select MAX(number) from %1").arg(FINANCIAL_TABLE));
+    m_errorStr = m_financialQuery->lastError().text();
+
+    if (m_financialQuery->next()) {
+
+        number = m_financialQuery->value(0).toInt();
+        qDebug() << number;
+    }
+
+    return ret;
+}
+
 bool SqlDatabase::productInfoIsExist(int number)
 {
     int count = 0;
@@ -854,8 +1217,11 @@ bool SqlDatabase::insertProductInfo(const QString& orderID, const ProductInfo& p
         return ret;
     }
 
-    QString cmd = QString("insert into %1 (orderID,productName,price,costPrice,count,spec) "
-                          "VALUES('%2', '%3', %4, %5, %6, '%7')").arg(PRODUCT_TABLE).arg(orderID).arg(productInfo.productName).arg(productInfo.price).arg(productInfo.costPrice).arg(productInfo.count).arg(productInfo.spec);
+    QString cmd = QString("insert into %1 (orderID,productName,price,costPrice,count,spec,mark) "
+                          "VALUES('%2', '%3', %4, %5, %6, '%7', '%8')").arg(PRODUCT_TABLE).\
+                          arg(orderID).arg(productInfo.productName).arg(productInfo.price).\
+                          arg(productInfo.costPrice).arg(productInfo.count).arg(productInfo.spec).\
+                          arg(productInfo.mark);
     ret = m_productQuery->exec(cmd);
     if(!ret)
     {
@@ -884,7 +1250,8 @@ bool SqlDatabase::updateProductInfo(const ProductInfo& productInfo)
                               "price = :price,"
                               "costPrice = :costPrice,"
                               "count = :count,"
-                              "spec = :spec "
+                              "spec = :spec,"
+                              "mark = :mark "
                               "where number = :number").arg(PRODUCT_TABLE);
         m_productQuery->prepare(cmd);
 
@@ -893,6 +1260,7 @@ bool SqlDatabase::updateProductInfo(const ProductInfo& productInfo)
         m_productQuery->bindValue(":costPrice", productInfo.costPrice);
         m_productQuery->bindValue(":count", productInfo.count);
         m_productQuery->bindValue(":spec", productInfo.spec);
+        m_productQuery->bindValue(":mark", productInfo.mark);
         m_productQuery->bindValue(":number", productInfo.number);
 
         ret = m_productQuery->exec();
@@ -934,6 +1302,7 @@ bool SqlDatabase::getProductInfoByOrderID(const QString& orderID, QList<ProductI
         info.costPrice = m_productQuery->value(4).toDouble(&ret);
         info.count = m_productQuery->value(5).toInt(&ret);
         info.spec = m_productQuery->value(6).toString();
+        info.mark = m_productQuery->value(7).toString();
 
         productInfoList.append(info);
     }
@@ -985,6 +1354,8 @@ void SqlDatabase::getOrderInfoList(QSqlQuery* query, QList<OrderInformation>& or
         orderInfo.handlingFee = m_orderQuery->value(11).toDouble();
         orderInfo.remarks = m_orderQuery->value(12).toString();
         orderInfo.salesman = m_orderQuery->value(13).toString();
+        orderInfo.contractID = m_orderQuery->value(14).toString();
+
 
         orderInfoList.append(orderInfo);
     }
@@ -1000,6 +1371,44 @@ bool SqlDatabase::deleteProductInfo(const QString& orderID)
         ret = m_productQuery->exec();
         if (!ret) {
             m_errorStr = m_productQuery->lastError().text();
+        } else {
+            m_errorStr =  "删除产品信息成功！";
+        }
+    }
+
+    return ret;
+}
+
+
+bool SqlDatabase::deleteProductInfo(int number)
+{
+    bool ret = false;
+
+    if (m_productQueryIsOK) {
+        m_productQuery->prepare(QString("delete from %1 where number = ?").arg(PRODUCT_TABLE));
+        m_productQuery->addBindValue(number);
+        ret = m_productQuery->exec();
+        if (!ret) {
+            m_errorStr = m_productQuery->lastError().text();
+        } else {
+            m_errorStr =  "删除产品信息成功！";
+        }
+    }
+
+    return ret;
+}
+
+
+bool SqlDatabase::deleteFinacialInfo(int number)
+{
+    bool ret = false;
+
+    if (m_financialQueryIsOK) {
+        m_financialQuery->prepare(QString("delete from %1 where number = ?").arg(FINANCIAL_TABLE));
+        m_financialQuery->addBindValue(number);
+        ret = m_financialQuery->exec();
+        if (!ret) {
+            m_errorStr = m_financialQuery->lastError().text();
         } else {
             m_errorStr =  "删除产品信息成功！";
         }
