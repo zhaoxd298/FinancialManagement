@@ -89,7 +89,6 @@ public:
     bool deleteOrderInfo(const QString& orderID);
     bool deleteProductInfo(int number);
     bool deleteFinacialInfo(int number);
-
 };
 
 #endif // COOKIESQL_H

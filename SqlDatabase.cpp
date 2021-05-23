@@ -1398,7 +1398,6 @@ bool SqlDatabase::deleteProductInfo(int number)
     return ret;
 }
 
-
 bool SqlDatabase::deleteFinacialInfo(int number)
 {
     bool ret = false;

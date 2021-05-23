@@ -269,7 +269,6 @@ void OrderDialog::onCalHandlingFeeBtn()
     }
 }
 
-/// ????
 void OrderDialog::onPayTypeCbxIndexChanged(int index)
 {
     //qDebug() << index;
