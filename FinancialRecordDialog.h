@@ -42,6 +42,9 @@ public:
     void setCustomerName(const QString& name);
     void disableCustomerNameEdit();
 
+    void setcontractID(const QString& contractID);
+    void disablecontractIDEdit();
+
 public slots:
     void onOKBtn();
     void onCancelBtn();

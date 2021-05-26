@@ -76,7 +76,7 @@ void OrderDialog::constructUI()
     m_gridLayout->addWidget(realIncomeLabel, 6, 0, 1, 1);
     m_gridLayout->addWidget(m_realIncomeEdit, 6, 1, 1, 3);
 
-    m_financialRecordBtn = new QPushButton(tr("收支记录"));
+    m_financialRecordBtn = new QPushButton(tr("新增收支记录"));
     m_gridLayout->addWidget(m_financialRecordBtn, 6, 4, 1, 1);
 
     QLabel* freightCustomerLabel = new QLabel(tr("运费(客户)(RMB)："));

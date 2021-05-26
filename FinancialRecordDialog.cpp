@@ -56,6 +56,16 @@ void FinancialRecordDialog::disableCustomerNameEdit()
     m_customerNameEdit->setEnabled(false);
 }
 
+void FinancialRecordDialog::setcontractID(const QString& contractID)
+{
+    m_contractIDEdit->setText(contractID);
+}
+
+void FinancialRecordDialog::disablecontractIDEdit()
+{
+    m_contractIDEdit->setEnabled(false);
+}
+
 void FinancialRecordDialog::constructUI()
 {
     m_gridLayout = new QGridLayout(this);

@@ -27,6 +27,7 @@ private:
     QAction* m_editAction;
     QAction* m_deleteAction;
     QAction* m_copyAction;
+    QAction* m_pasteAction;
     QAction* m_changeOrderStatusToUnpayedAction;
     QAction* m_changeOrderStatusToPayedAction;
     QAction* m_checkAllAction;
@@ -132,20 +133,21 @@ signals:
 
     void sigChangeOrderStatus(const QStringList& orderList, const QString& status);
 
-    void sigNewFinancialRecord(const QString& name);
+    void sigNewFinancialRecord(const QString& name, const QString& contractID = "");
     void sigSearchFinancialByCustomerName(const QString& name);
+    void sigSearchFinancialByContractID(const QString& contractID);
 
 public slots:
     void onHeaderClicked(int i);    // 单击表头槽函数
 
     void onEdit();                  // 编辑
     void onCopy();
+    void onPaste();
 
     void onChangeOrderStatusToUnpayed();  // 修改订单状态为“未结算利润”
     void onChangeOrderStatusToPayed();  // 修改订单状态为“已结算利润”
 
     void onCheckAll();                  // CTRL+A勾选全部用户
-
 
     void onSearchHistoryOrder();        // 查找历史订单
     void onNewOrder();                  // 新建订单

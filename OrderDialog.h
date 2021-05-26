@@ -33,7 +33,7 @@ private:
     QComboBox* m_payTypeCbx;					// 付款方式
     QLineEdit* m_otherPayTypeEdit;              // 其他付款方式
     QLineEdit* m_realIncomeEdit;                // 实收
-    QPushButton* m_financialRecordBtn;              // 收支出记录
+    QPushButton* m_financialRecordBtn;          // 收支出记录
     QLineEdit* m_handlingFeeEdit;				// 平台手续费
     QPushButton* m_calHandlingFeeBtn;           // 自动计算平台手续费
     QLineEdit* m_freightCustomerEdit;			// 运费(客户)

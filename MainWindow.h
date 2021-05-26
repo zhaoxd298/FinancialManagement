@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QPushButton>
+#include <QLabel>
 
 #include "SqlDatabase.h"
 #include "TableWidget.h"
@@ -24,15 +25,19 @@ private:
     QWidget* m_mainWidget;
     TableWidget* m_tableWidget;
 
+    QLabel* m_statusLabel;
+
     void constructUI();
     void connectSlots();
 
     bool addNewOrder(const QString& customerName="");
-    bool addNewFinancialRecord(const QString& customerName="");
-    void searchFinancialRecord(int type, const QString& keyword);
+    bool addNewFinancialRecord(const QString& customerName="", const QString &contractID = "");
+    void searchFinancialRecord(int type, const QString& keyword, bool showDataInNewDialog = false);
 
 public:
     MainWindow(QWidget *parent = 0);
+
+    void setStatusText(const QString& text);
 
     ~MainWindow();
 
@@ -47,9 +52,10 @@ public slots:
     void onSearchHistoryOrder(const QString& name);      // 查找历史订单
     void onNewOrder(const QString& name);                // 新建订单
 
-    void onAddFinancialRecord(const QString& name = "");
+    void onAddFinancialRecord(const QString& name = "", const QString& contractID = "");
     void onSearchFinancialRecordBtn();
     void onSearchFinancialByCustomerName(const QString& name);
+    void onSearchFinancialBycontractID(const QString& contractID);
     void onEditFinancialInfo(int row, int number);
 
     void onChangeOrderStatus(const QStringList& orderList, const QString& status);  // 修改订单状态

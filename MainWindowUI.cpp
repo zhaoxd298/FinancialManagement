@@ -51,9 +51,13 @@ void MainWindow::constructUI()
 
     m_tableWidget = new TableWidget;
 
+    m_statusLabel = new QLabel;
+    m_statusLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     QVBoxLayout* mainWidgetVLayout = new QVBoxLayout(m_mainWidget);
     mainWidgetVLayout->addLayout(menuHLayout);
     mainWidgetVLayout->addWidget(m_tableWidget);
+    mainWidgetVLayout->addWidget(m_statusLabel);
 
     this->resize(1200, 600);
 

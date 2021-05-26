@@ -26,7 +26,8 @@ SOURCES += main.cpp \
     OrderInformation.cpp \
     SearchCustomerDialog.cpp \
     SearchFinancialRecordDialog.cpp \
-    FinancialRecordDialog.cpp
+    FinancialRecordDialog.cpp \
+    TableWidgetDialog.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -42,4 +43,5 @@ HEADERS  += \
     Version.h \
     SearchFinancialRecordDialog.h \
     FinancialRecordDialog.h \
-    FinancialRecordInfo.h
+    FinancialRecordInfo.h \
+    TableWidgetDialog.h

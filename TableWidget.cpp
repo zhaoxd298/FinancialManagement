@@ -109,7 +109,6 @@ void TableWidget::setDataTypeOrderInfo()
     m_header.clear();
 #if defined(EXSUN_LIGHTING_FINANCIAL)
     m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
-
            << "成本单价" << "数量" << "规格" << "唛头"<< "付款时间" << "付款方式"
            << "实收金额" << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
@@ -148,6 +147,10 @@ void TableWidget::setDataTypeOrderInfo()
         mainMenu->addAction(m_checkAllAction);
         mainMenu->addSeparator();
 
+        mainMenu->addAction(m_newFinancialRecordAction);
+        mainMenu->addAction(m_searchFinancialRecordAction);
+        mainMenu->addSeparator();
+
         mainMenu->addAction(m_exportToXlsAction);
         mainMenu->addAction(m_copyToXlsAction);
         mainMenu->addSeparator();
@@ -179,6 +182,10 @@ void TableWidget::setDataTypeProductInfo()
     if (NULL != mainMenu)
     {
         mainMenu->clear(); //清除原有菜单
+
+        mainMenu->addAction(m_pasteAction);
+        mainMenu->addSeparator();
+
         mainMenu->addAction(m_addProductAction);
         m_deleteAction->setText(tr("删除该产品"));
         mainMenu->addAction(m_deleteAction);
@@ -796,6 +803,11 @@ void TableWidget::createActions()
     m_copyAction->setShortcut(QKeySequence::Copy);
     addAction(m_copyAction);
 
+    m_pasteAction = new QAction(tr("粘贴"), this);
+    connect(m_pasteAction, SIGNAL(triggered(bool)), this, SLOT(onPaste()));
+    m_pasteAction->setShortcut(QKeySequence::Paste);
+    addAction(m_pasteAction);
+
     m_changeOrderStatusToUnpayedAction  = new QAction(tr("设置订单状态为\"未结算利润\""), this);
     connect(m_changeOrderStatusToUnpayedAction, SIGNAL(triggered(bool)), this, SLOT(onChangeOrderStatusToUnpayed()));
     m_changeOrderStatusToPayedAction  = new QAction(tr("设置订单状态为\"已结算利润\""), this);
@@ -1008,6 +1020,34 @@ void TableWidget::onCopy()
     }
 
     QApplication::clipboard()->setText(str);
+}
+
+void TableWidget::onPaste()
+{
+    QString str = QApplication::clipboard()->text();
+
+    QTableWidgetSelectionRange range = selectedRanges().first();
+    int topRow = range.topRow();
+    int leftColumn = range.leftColumn();
+
+    QStringList rowList = str.split('\n');
+    for (int i=0; i<rowList.size(); i++)
+    {
+        QStringList itemList = rowList[i].split('\t');
+        int size = itemList.size();
+        if (size > columnCount())
+        {
+            size = columnCount();
+        }
+
+        for (int j=0; j<size; j++)
+        {
+            if (leftColumn+j < columnCount())
+            {
+                setCellData(topRow+i, leftColumn+j, itemList[j]);
+            }
+        }
+    }
 }
 
 void TableWidget::onChangeOrderStatusToUnpayed()  // 修改订单状态为“未结算利润”
@@ -1375,24 +1415,60 @@ void TableWidget::onDelete()      // 删除
 
 void TableWidget::onNewFinancialRecordAction()  // 新增收支记录
 {
-    QString name = itemText(currentRow(), 0);
-    if (name.isEmpty())
+    QString name = "";
+    QString contractID = "";
+
+    if (DATA_IS_CUSTOMER_INFO == m_dataType)
     {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
-        return;
+        name = itemText(currentRow(), 0);
+        if (name.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+            return;
+        }
+    }
+    else if (DATA_IS_ORDER_INFO == m_dataType)
+    {
+        contractID = itemText(currentRow(), 0);
+        if (contractID.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));
+            return;
+        }
+
+        name = itemText(currentRow(), 1);
+        if (name.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+            return;
+        }
     }
 
-    emit sigNewFinancialRecord(name);
+    emit sigNewFinancialRecord(name, contractID);
 }
 
 void TableWidget::onSearchFinancialRecordAction()   // 查找收支记录
 {
-    QString name = itemText(currentRow(), 0);
-    if (name.isEmpty())
+    if (DATA_IS_CUSTOMER_INFO == m_dataType)
     {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
-        return;
-    }
+        QString name = itemText(currentRow(), 0);
+        if (name.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+            return;
+        }
 
-    emit sigSearchFinancialByCustomerName(name);
+        emit sigSearchFinancialByCustomerName(name);
+    }
+    else if (DATA_IS_ORDER_INFO == m_dataType)
+    {
+        QString contractID = itemText(currentRow(), 0);
+        if (contractID.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));
+            return;
+        }
+
+        emit sigSearchFinancialByContractID(contractID);
+    }
 }
