@@ -107,18 +107,11 @@ void TableWidget::setDataTypeOrderInfo()
     m_dataType = DATA_IS_ORDER_INFO;
 
     m_header.clear();
-#if defined(EXSUN_LIGHTING_FINANCIAL)
     m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
-           << "成本单价" << "数量" << "规格" << "唛头"<< "付款时间" << "付款方式"
-           << "实收金额" << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
-           << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润"
-           << "合伙人利润" << "备注";
-#elif defined(REVI_FINANCIAL)
-    m_header << "合同编号" << "客户" << "订单状态" << "品名" << "单价"
-           << "成本单价" << "数量" << "规格"  << "唛头" << "付款时间" << "付款方式"
-           << "实收金额" << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
+           << "成本单价" << "数量" << "规格"  << "唛头" << "实收金额"
+           << "应收金额" << "运费（客户）" << "运费(厂家→我司)" << "运费(我司→货代)"
            << "运费(国外)" << "汇率" << "平台手续费" << "总支出" << "总利润" << "备注";
-#endif
+
     m_validClumnCnt = m_header.size();
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
@@ -382,8 +375,8 @@ void TableWidget::addOrderInformation(int row, const OrderInformation& orderInfo
     setCellData(row, orderInfo.CountColumn, QString::number(orderInfo.productList[0].count));
     setCellData(row, orderInfo.SpecColumn, orderInfo.productList[0].spec);
     setCellData(row, orderInfo.MarkColumn, orderInfo.productList[0].mark);
-    setCellData(row, orderInfo.PayTimeColumn, orderInfo.payTime);
-    setCellData(row, orderInfo.PayTypeColumn, orderInfo.payType);
+    //setCellData(row, orderInfo.PayTimeColumn, orderInfo.payTime);
+    //setCellData(row, orderInfo.PayTypeColumn, orderInfo.payType);
     setCellData(row, orderInfo.RealIncomeColumn, doubleToStr(orderInfo.realIncome));
     setCellData(row, orderInfo.ShouldIncomeColumn, doubleToStr(orderInfo.shouldIncome));
     setCellData(row, orderInfo.FreightCustomerColumn, doubleToStr(orderInfo.freightCustomer));
@@ -392,7 +385,7 @@ void TableWidget::addOrderInformation(int row, const OrderInformation& orderInfo
     setCellData(row, orderInfo.FreightForeignColumn, doubleToStr(orderInfo.freightForeign));
     setCellData(row, orderInfo.ExchangeRateColumn, doubleToStr(orderInfo.exchangeRate));
     setCellData(row, orderInfo.HandlingFeeColumn, doubleToStr(orderInfo.handlingFee));
-    setCellData(row, orderInfo.TatolExpensesColumn, doubleToStr(orderInfo.tatolExpenses));
+    setCellData(row, orderInfo.TotalExpensesColumn, doubleToStr(orderInfo.tatolExpenses));
     setCellData(row, orderInfo.TotalProfitColumn, doubleToStr(orderInfo.totalProfit));
 #if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
     setCellData(row, orderInfo.PartnerProfitColumn, doubleToStr(orderInfo.partnerProfit));
@@ -446,41 +439,32 @@ void TableWidget::updateOrderStatistics(int row)
     double handlingFeeSum = 0;
     double tatolExpensesSum = 0;
     double totalProfitSum = 0;
-#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
-    double partnerProfitSum  = 0;
-#endif
 
     //qDebug() << "***********row:" << row;
 
     for (int i=0; i<row; i++)
     {
-        realIncomeSum += itemText(i, 11).toDouble();
-        shouldIncomeSum += itemText(i, 12).toDouble();
-        freightCustomerSum += itemText(i, 13).toDouble();
-        freightFactoryToUsSum += itemText(i, 14).toDouble();
-        freightUsToForwardingSum += itemText(i, 15).toDouble();
-        freightForeignSum += itemText(i, 16).toDouble();
-        handlingFeeSum += itemText(i, 18).toDouble();
-        tatolExpensesSum += itemText(i, 19).toDouble();
-        totalProfitSum += itemText(i, 20).toDouble();
-#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
-        partnerProfitSum += itemText(i, 21).toDouble();
-#endif
+        realIncomeSum += itemText(i, OrderInformation::RealIncomeColumn).toDouble();
+        shouldIncomeSum += itemText(i, OrderInformation::ShouldIncomeColumn).toDouble();
+        freightCustomerSum += itemText(i, OrderInformation::FreightCustomerColumn).toDouble();
+        freightFactoryToUsSum += itemText(i, OrderInformation::FreightFactoryToUsColumn).toDouble();
+        freightUsToForwardingSum += itemText(i, OrderInformation::FreightUsToForwardingColumn).toDouble();
+        freightForeignSum += itemText(i, OrderInformation::FreightForeignColumn).toDouble();
+        handlingFeeSum += itemText(i, OrderInformation::HandlingFeeColumn).toDouble();
+        tatolExpensesSum += itemText(i, OrderInformation::TotalExpensesColumn).toDouble();
+        totalProfitSum += itemText(i, OrderInformation::TotalProfitColumn).toDouble();
     }
 
     setCellData(row, 0, tr("合计"));
-    setCellData(row, 11, doubleToStr(realIncomeSum));
-    setCellData(row, 12, doubleToStr(shouldIncomeSum));
-    setCellData(row, 13, doubleToStr(freightCustomerSum));
-    setCellData(row, 14, doubleToStr(freightFactoryToUsSum));
-    setCellData(row, 15, doubleToStr(freightUsToForwardingSum));
-    setCellData(row, 16, doubleToStr(freightForeignSum));
-    setCellData(row, 18, doubleToStr(handlingFeeSum));
-    setCellData(row, 19, doubleToStr(tatolExpensesSum));
-    setCellData(row, 20, doubleToStr(totalProfitSum));
-#if defined(EXSUN_LIGHTING_FINANCIAL)   // 亿生有合伙人利润
-    setCellData(row, 21, doubleToStr(partnerProfitSum));
-#endif
+    setCellData(row, OrderInformation::RealIncomeColumn, doubleToStr(realIncomeSum));
+    setCellData(row, OrderInformation::ShouldIncomeColumn, doubleToStr(shouldIncomeSum));
+    setCellData(row, OrderInformation::FreightCustomerColumn, doubleToStr(freightCustomerSum));
+    setCellData(row, OrderInformation::FreightFactoryToUsColumn, doubleToStr(freightFactoryToUsSum));
+    setCellData(row, OrderInformation::FreightUsToForwardingColumn, doubleToStr(freightUsToForwardingSum));
+    setCellData(row, OrderInformation::FreightForeignColumn, doubleToStr(freightForeignSum));
+    setCellData(row, OrderInformation::HandlingFeeColumn, doubleToStr(handlingFeeSum));
+    setCellData(row, OrderInformation::TotalExpensesColumn, doubleToStr(tatolExpensesSum));
+    setCellData(row, OrderInformation::TotalProfitColumn, doubleToStr(totalProfitSum));
 }
 
 void TableWidget::updateOrderStatistics()
@@ -1191,7 +1175,7 @@ void TableWidget::editFinancialInfo()
         return;
     }
 
-    emit sigEditFinancialInfo(currentRow(), number);
+    emit sigEditFinancialInfo(currentRow(), number, this);
 }
 
 void TableWidget::deleteCustomerInfo()

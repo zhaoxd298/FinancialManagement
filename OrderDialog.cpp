@@ -8,11 +8,8 @@ OrderDialog::OrderDialog(QWidget *parent)
     : QDialog(parent, Qt::WindowCloseButtonHint)
 {
     constructUI();
+    connectSlot();
 
-    connect(m_okBtn, SIGNAL(clicked(bool)), this, SLOT(onOKBtn()));
-    connect(m_cancelBtn, SIGNAL(clicked(bool)), this, SLOT(onCancelBtn()));
-    connect(m_calHandlingFeeBtn, SIGNAL(clicked(bool)), this, SLOT(onCalHandlingFeeBtn()));
-    //connect(m_payTypeCbx, SIGNAL(currentIndexChanged(int)), this, SLOT(onPayTypeCbxIndexChanged(int)));
 }
 
 void OrderDialog::constructUI()
@@ -45,6 +42,7 @@ void OrderDialog::constructUI()
     m_gridLayout->addWidget(orderStatusLabel, 3, 0, 1, 1);
     m_gridLayout->addWidget(m_orderStatusCbx, 3, 1, 1, 3);
 
+#if 0
     QLabel* payTimeLabel = new QLabel(tr("付款时间："));
     m_payTimeEdit = new QDateTimeEdit(QDateTime::currentDateTime());
     m_payTimeEdit->setCalendarPopup(true);
@@ -69,6 +67,7 @@ void OrderDialog::constructUI()
     m_gridLayout->addWidget(payTypeLabel, 5, 0, 1, 1);
     m_gridLayout->addWidget(m_payTypeCbx, 5, 1, 1, 3);
     m_gridLayout->addWidget(m_otherPayTypeEdit, 5, 4, 1, 2);
+#endif
 
     QLabel* realIncomeLabel = new QLabel(tr("实收(RMB)："));
     m_realIncomeEdit = new QLineEdit;
@@ -139,6 +138,15 @@ void OrderDialog::constructUI()
     //this->setFixedHeight(280);
 }
 
+void OrderDialog::connectSlot()
+{
+    connect(m_okBtn, SIGNAL(clicked(bool)), this, SLOT(onOKBtn()));
+    connect(m_cancelBtn, SIGNAL(clicked(bool)), this, SLOT(onCancelBtn()));
+    connect(m_calHandlingFeeBtn, SIGNAL(clicked(bool)), this, SLOT(onCalHandlingFeeBtn()));
+    connect(m_financialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onFinancialRecordBtn()));
+    //connect(m_payTypeCbx, SIGNAL(currentIndexChanged(int)), this, SLOT(onPayTypeCbxIndexChanged(int)));
+}
+
 QList<OrderInformation> OrderDialog::getOrderList()
 {
     return m_orderInfoList;
@@ -151,6 +159,8 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
     m_contractIDEdit->setText(orderInfo.contractID);
     m_customerNameEdit->setText(orderInfo.customerName);
     m_orderStatusCbx->setCurrentText(orderInfo.orderStatus);
+
+#if 0
     QStringList list = orderInfo.payTime.split('-');
     if (list.size() >= 3)
     {
@@ -176,6 +186,8 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
     {
         m_payTypeCbx->setCurrentText(orderInfo.payType);
     }
+#endif
+
     m_realIncomeEdit->setText(QString::number(orderInfo.realIncome));
     m_handlingFeeEdit->setText(QString::number(orderInfo.handlingFee));
     m_freightCustomerEdit->setText(QString::number(orderInfo.freightCustomer));
@@ -211,22 +223,14 @@ void OrderDialog::onOKBtn()
     orderInfo.contractID = m_contractIDEdit->text();
     orderInfo.customerName = m_customerNameEdit->text();
     orderInfo.orderStatus = m_orderStatusCbx->currentText();
-    orderInfo.payTime = m_payTimeEdit->text();      // ???
-    orderInfo.payType = m_payTypeCbx->currentText();
-    if (!m_otherPayTypeEdit->text().isEmpty())
+    orderInfo.payTime = "";      // ???
+    orderInfo.payType = "";
+    /*if (!m_otherPayTypeEdit->text().isEmpty())
     {
         orderInfo.payType += "-";
         orderInfo.payType += m_otherPayTypeEdit->text();
-    }
-
-    /*if (OrderDialog::PayByOther == m_payTypeCbx->currentIndex())
-    {
-        orderInfo.payType = m_payTypeCbx->currentText() + "-" + m_otherPayTypeEdit->text();
-    }
-    else
-    {
-        orderInfo.payType = m_payTypeCbx->currentText();
     }*/
+
     orderInfo.realIncome = m_realIncomeEdit->text().toDouble();
     orderInfo.handlingFee = m_handlingFeeEdit->text().toDouble();
     orderInfo.freightCustomer = m_freightCustomerEdit->text().toDouble();
@@ -282,4 +286,9 @@ void OrderDialog::onPayTypeCbxIndexChanged(int index)
         m_gridLayout->removeWidget(m_otherPayTypeEdit);
         m_otherPayTypeEdit->setParent(NULL);
     }
+}
+
+void OrderDialog::onFinancialRecordBtn()
+{
+    emit sigAddFinancialRecord(m_customerNameEdit->text(), m_contractIDEdit->text());
 }

@@ -8,6 +8,7 @@
 
 #include "SqlDatabase.h"
 #include "TableWidget.h"
+#include "TableWidgetDialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -24,6 +25,8 @@ private:
 
     QWidget* m_mainWidget;
     TableWidget* m_tableWidget;
+
+    TableWidgetDialog* m_tableWidgetDialog;
 
     QLabel* m_statusLabel;
 
@@ -56,7 +59,7 @@ public slots:
     void onSearchFinancialRecordBtn();
     void onSearchFinancialByCustomerName(const QString& name);
     void onSearchFinancialBycontractID(const QString& contractID);
-    void onEditFinancialInfo(int row, int number);
+    void onEditFinancialInfo(int row, int number, TableWidget* tableWidget);
 
     void onChangeOrderStatus(const QStringList& orderList, const QString& status);  // 修改订单状态
 };

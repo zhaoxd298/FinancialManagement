@@ -9,6 +9,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     m_sqlDatabase = new SqlDatabase("customer");
+
+    m_tableWidgetDialog = new TableWidgetDialog;
+
     constructUI();
     connectSlots();
 }

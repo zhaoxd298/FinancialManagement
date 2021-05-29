@@ -126,7 +126,7 @@ public:
 signals:
     void sigEditCustomerInfo(int row, const QString& name);
     void sigEditOrderInfo(int row, const QString& orderID);
-    void sigEditFinancialInfo(int row, int number);
+    void sigEditFinancialInfo(int row, int number, TableWidget* tableWidget);
 
     void sigSearchHistoryOrder(const QString& name);
     void sigNewOrder(const QString& name);

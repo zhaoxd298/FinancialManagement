@@ -29,11 +29,11 @@ private:
     QLineEdit* m_contractIDEdit;                // 合同编号
     QLineEdit* m_customerNameEdit;				// 客户
     QComboBox* m_orderStatusCbx;				// 订单状态
-    QDateTimeEdit* m_payTimeEdit;				// 付款时间
-    QComboBox* m_payTypeCbx;					// 付款方式
+    //QDateTimeEdit* m_payTimeEdit;				// 付款时间
+    //QComboBox* m_payTypeCbx;					// 付款方式
     QLineEdit* m_otherPayTypeEdit;              // 其他付款方式
     QLineEdit* m_realIncomeEdit;                // 实收
-    QPushButton* m_financialRecordBtn;          // 收支出记录
+    QPushButton* m_financialRecordBtn;          // 收支记录
     QLineEdit* m_handlingFeeEdit;				// 平台手续费
     QPushButton* m_calHandlingFeeBtn;           // 自动计算平台手续费
     QLineEdit* m_freightCustomerEdit;			// 运费(客户)
@@ -49,6 +49,7 @@ private:
     QPushButton* m_cancelBtn;
 
     void constructUI();
+    void connectSlot();
 
 public:
     enum {
@@ -81,11 +82,15 @@ public:
     void setCustomerName(const QString& name);
     void disableCustomerNameEdit();
 
+signals:
+    void sigAddFinancialRecord(const QString& name = "", const QString& contractID = "");
+
 public slots:
     void onOKBtn();
     void onCancelBtn();
     void onCalHandlingFeeBtn();
     void onPayTypeCbxIndexChanged(int index);
+    void onFinancialRecordBtn();
 };
 
 #endif // ADDCUSTOMERDIALOG_H

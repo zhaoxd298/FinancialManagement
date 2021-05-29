@@ -6,7 +6,6 @@
 #include "SearchOrderDialog.h"
 #include "FinancialRecordDialog.h"
 #include "SearchFinancialRecordDialog.h"
-#include "TableWidgetDialog.h"
 #include <QMessageBox>
 #include <QDebug>
 #include <QDate>
@@ -20,6 +19,9 @@ bool MainWindow::addNewOrder(const QString& customerName)
 {
     bool ret = false;
     OrderDialog dialog;
+
+    connect(&dialog, SIGNAL(sigAddFinancialRecord(QString,QString)), this, SLOT(onAddFinancialRecord(QString,QString)));
+
     if (!customerName.isEmpty())
     {
         dialog.setCustomerName(customerName);
@@ -142,18 +144,18 @@ void MainWindow::searchFinancialRecord(int type, const QString& keyword, bool sh
 
     if (showDataInNewDialog)
     {
-        TableWidgetDialog dialog;
-        dialog.setWindowTitle(tr("查找收支记录"));
-        dialog.getTableWidget()->clear();
-        dialog.getTableWidget()->setDataTypeFinancialInfo();
+        //TableWidgetDialog dialog;
+        m_tableWidgetDialog->setWindowTitle(tr("查找收支记录"));
+        m_tableWidgetDialog->getTableWidget()->clear();
+        m_tableWidgetDialog->getTableWidget()->setDataTypeFinancialInfo();
         if (ret && list.size()>0)
         {
             for (int i=0; i<list.size(); i++)
             {
-                dialog.getTableWidget()->addFinancialInfo(list[i]);
+                m_tableWidgetDialog->getTableWidget()->addFinancialInfo(list[i]);
             }
-            dialog.setStatusText(okStr);
-            dialog.exec();
+            m_tableWidgetDialog->setStatusText(okStr);
+            m_tableWidgetDialog->exec();
         }
         else
         {
@@ -199,7 +201,9 @@ void MainWindow::connectSlots()
 
     connect(m_tableWidget, SIGNAL(sigEditCustomerInfo(int, QString)), this, SLOT(onEditCustomerInfo(int, QString)));
     connect(m_tableWidget, SIGNAL(sigEditOrderInfo(int, QString)), this, SLOT(onEditOrderInfo(int, QString)));
-    connect(m_tableWidget, SIGNAL(sigEditFinancialInfo(int,int)), this, SLOT(onEditFinancialInfo(int,int)));
+    connect(m_tableWidget, SIGNAL(sigEditFinancialInfo(int,int,TableWidget*)), this, SLOT(onEditFinancialInfo(int,int,TableWidget*)));
+
+    connect(m_tableWidgetDialog->getTableWidget(), SIGNAL(sigEditFinancialInfo(int,int,TableWidget*)), this, SLOT(onEditFinancialInfo(int,int,TableWidget*)));
 
     connect(m_tableWidget, SIGNAL(sigNewOrder(QString)), this, SLOT(onNewOrder(QString)));
     connect(m_tableWidget, SIGNAL(sigSearchHistoryOrder(QString)), this, SLOT(onSearchHistoryOrder(QString)));
@@ -214,7 +218,7 @@ void MainWindow::onAddCustomerBtn()
     if(dialog.exec() == QDialog::Accepted)
     {
         //CustomerInfoSql customerInfoSql("Customer");
-        qDebug() << "accepted!";
+        //qDebug() << "accepted!";
         m_tableWidget->clear();
         m_tableWidget->setDataTypeCustomerInfo();
 
@@ -440,7 +444,7 @@ void MainWindow::onSearchFinancialBycontractID(const QString& contractID)
     searchFinancialRecord(SearchFinancialRecordDialog::SearchByContractID, contractID, true);
 }
 
-void MainWindow::onEditFinancialInfo(int row, int number)
+void MainWindow::onEditFinancialInfo(int row, int number, TableWidget* tableWidget)
 {
     qDebug() << "onEditFinancialInfo" << row << number;
     QList<FinancialRecordInfo> list;
@@ -463,11 +467,11 @@ void MainWindow::onEditFinancialInfo(int row, int number)
         info.number = number;
         if (true == m_sqlDatabase->updateFinacialInfo(info))
         {
-            m_tableWidget->updateFinancialInfo(row, info);
-            m_tableWidget->updateFinancialStatistics();
-            //QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"收支记录更新成功，具体内容显示在表格中！")).arg(info.contractID), QString(tr("确定")));
+            tableWidget->updateFinancialInfo(row, info);
+            tableWidget->updateFinancialStatistics();
             QString okStr = QString(tr("订单\"%1\"收支记录更新成功，具体内容显示在表格中！")).arg(info.contractID);
-            setStatusText(okStr);
+            QMessageBox::information(tableWidget, QString(tr("提示")), okStr, QString(tr("确定")));
+            //setStatusText(okStr);
         }
         else
         {
