@@ -216,6 +216,10 @@ void TableWidget::setDataTypeFinancialInfo()
         mainMenu->addAction(m_deleteAction);
         mainMenu->addSeparator();
 
+        mainMenu->addAction(m_newFinancialRecordAction);
+        mainMenu->addAction(m_searchFinancialRecordAction);
+        mainMenu->addSeparator();
+
         mainMenu->addAction(m_copyAction);
         mainMenu->addAction(m_checkAllAction);
         mainMenu->addSeparator();
@@ -1426,6 +1430,21 @@ void TableWidget::onNewFinancialRecordAction()  // 新增收支记录
             QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
             return;
         }
+    } else if (DATA_IS_FINANCIAL_INFO == m_dataType)
+    {
+        name = itemText(currentRow(), 0);
+        if (name.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取客户名失败！")), QString(tr("确定")));
+            return;
+        }
+
+        contractID = itemText(currentRow(), 1);
+        if (contractID.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));
+            return;
+        }
     }
 
     emit sigNewFinancialRecord(name, contractID);
@@ -1447,6 +1466,17 @@ void TableWidget::onSearchFinancialRecordAction()   // 查找收支记录
     else if (DATA_IS_ORDER_INFO == m_dataType)
     {
         QString contractID = itemText(currentRow(), 0);
+        if (contractID.isEmpty())
+        {
+            QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));
+            return;
+        }
+
+        emit sigSearchFinancialByContractID(contractID);
+    }
+    else if (DATA_IS_FINANCIAL_INFO == m_dataType)
+    {
+        QString contractID = itemText(currentRow(), 1);
         if (contractID.isEmpty())
         {
             QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));

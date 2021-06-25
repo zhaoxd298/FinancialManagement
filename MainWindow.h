@@ -34,9 +34,10 @@ private:
     void connectSlots();
 
     bool addNewOrder(const QString& customerName="");
-    bool addNewFinancialRecord(const QString& customerName="", const QString &contractID = "");
+    bool addNewFinancialRecord(const QString& customerName="", const QString &contractID = "", bool flag = false);
     void searchFinancialRecord(int type, const QString& keyword, bool showDataInNewDialog = false);
 
+    double getRealIncome(const QString& contractID);
 public:
     MainWindow(QWidget *parent = 0);
 
@@ -56,6 +57,7 @@ public slots:
     void onNewOrder(const QString& name);                // 新建订单
 
     void onAddFinancialRecord(const QString& name = "", const QString& contractID = "");
+    void onAddFinancialRecordBtn();
     void onSearchFinancialRecordBtn();
     void onSearchFinancialByCustomerName(const QString& name);
     void onSearchFinancialBycontractID(const QString& contractID);

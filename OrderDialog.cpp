@@ -1,15 +1,21 @@
 #include "OrderDialog.h"
 #include <QMessageBox>
 #include <QDateTime>
+#include <QList>
 #include <QDebug>
 #include "Version.h"
+#include "SqlDatabase.h"
+#include "FinancialRecordInfo.h"
 
 OrderDialog::OrderDialog(QWidget *parent)
     : QDialog(parent, Qt::WindowCloseButtonHint)
 {
+    m_newOrderFlag = 1;
+
     constructUI();
     connectSlot();
 
+    setRealIncome();
 }
 
 void OrderDialog::constructUI()
@@ -201,6 +207,10 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
     {
         m_productTableWidget->addProductInfo(orderInfo.productList[i]);
     }
+
+    setRealIncome();
+
+    m_newOrderFlag = 0;
 }
 
 void OrderDialog::setCustomerName(const QString& name)
@@ -211,6 +221,44 @@ void OrderDialog::setCustomerName(const QString& name)
 void OrderDialog::disableCustomerNameEdit()
 {
     m_customerNameEdit->setEnabled(false);
+}
+
+//    bool getFinacialInfoByContractID(const QString& contractID, QList<FinancialRecordInfo>& financialRecordInfoList);
+
+void OrderDialog::setRealIncome()
+{
+    SqlDatabase sql("record");
+    QList<FinancialRecordInfo> list;
+    QString contractID = m_contractIDEdit->text();
+
+    if (contractID.isEmpty())
+    {
+        //QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取合同编号失败！")), QString(tr("确定")));
+        qDebug() << "OrderDialog::setRealIncome " << "获取合同编号失败！";
+        return;
+    }
+
+    if (false == sql.getFinacialInfoByContractID(contractID, list))
+    {
+        //QMessageBox::critical(this, QString(tr("错误")), QString(tr("获取收支记录失败！")), QString(tr("确定")));
+        qDebug() << "OrderDialog::setRealIncome " << "获取收支记录失败！";
+        return;
+    }
+
+    double realIncome = 0;
+    for (int i=0; i<list.size(); i++)
+    {
+        if (tr("收入") == list[i].type)
+        {
+            realIncome += list[i].amount;
+        }
+    }
+
+    if (realIncome > 0)
+    {
+        m_realIncomeEdit->setText(QString::number(realIncome));
+        m_realIncomeEdit->setEnabled(false);
+    }
 }
 
 void OrderDialog::onOKBtn()
@@ -248,13 +296,23 @@ void OrderDialog::onOKBtn()
     if (orderInfo.customerName.isEmpty() || orderInfo.productList.size() == 0)
     {
         QMessageBox::critical(this, tr("错误"), tr("客户名称、货品名称、数量、单价不能为空！"), QString(tr("确认")));
+        return;
     }
-    else
-    {
-        m_orderInfoList.append(orderInfo);
 
-        this->accept();
+    if (1 == m_newOrderFlag)
+    {
+        SqlDatabase sql("contractID");
+        if (true == sql.contractIDIsExist(orderInfo.contractID))
+        {
+            QString str = QString(tr("合同编号：\"%1\"已经存在！")).arg(orderInfo.contractID);
+            QMessageBox::critical(this, tr("错误"), str, QString(tr("确认")));
+            return;
+        }
     }
+
+    m_orderInfoList.append(orderInfo);
+
+    this->accept();
 }
 
 void OrderDialog::onCancelBtn()
@@ -289,6 +347,17 @@ void OrderDialog::onPayTypeCbxIndexChanged(int index)
 }
 
 void OrderDialog::onFinancialRecordBtn()
-{
-    emit sigAddFinancialRecord(m_customerNameEdit->text(), m_contractIDEdit->text());
+{   
+    QString name = m_customerNameEdit->text();
+    QString contractID = m_contractIDEdit->text();
+
+    if (name.isEmpty() || contractID.isEmpty())
+    {
+        QMessageBox::critical(this, tr("错误"), tr("请下输入\"合同编号\"和\"客户名称\"！"), QString(tr("确认")));
+        return;
+    }
+
+    emit sigAddFinancialRecord(name, contractID);
+
+    setRealIncome();
 }

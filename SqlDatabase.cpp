@@ -499,6 +499,21 @@ bool SqlDatabase::orderInfoIsExist(const QString& orderID)
     return (0 != count) ? true : false;
 }
 
+bool SqlDatabase::contractIDIsExist(const QString& contractID)
+{
+    int count = 0;
+
+    if (m_orderQueryIsOK) {
+        m_orderQuery->exec(QString("select count(*) from %1 where contractID='%2'").arg(ORDER_TABLE).arg(contractID));
+
+        while (m_orderQuery->next()) {
+            count = m_orderQuery->value(0).toString().toInt();
+        }
+    }
+
+    return (0 != count) ? true : false;
+}
+
 
 bool SqlDatabase::insertOrderInfo(const OrderInformation& orderInfo)
 {

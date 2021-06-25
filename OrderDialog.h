@@ -45,6 +45,8 @@ private:
 
     TableWidget* m_productTableWidget;         // 产品信息
 
+    int m_newOrderFlag;
+
     QPushButton* m_okBtn;
     QPushButton* m_cancelBtn;
 
@@ -81,6 +83,8 @@ public:
 
     void setCustomerName(const QString& name);
     void disableCustomerNameEdit();
+
+    void setRealIncome();
 
 signals:
     void sigAddFinancialRecord(const QString& name = "", const QString& contractID = "");

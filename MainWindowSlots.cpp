@@ -62,7 +62,7 @@ bool MainWindow::addNewOrder(const QString& customerName)
 }
 
 
-bool MainWindow::addNewFinancialRecord(const QString& customerName, const QString& contractID)
+bool MainWindow::addNewFinancialRecord(const QString& customerName, const QString& contractID, bool flag)
 {
     bool ret = false;
     FinancialRecordDialog dialog;
@@ -81,9 +81,7 @@ bool MainWindow::addNewFinancialRecord(const QString& customerName, const QStrin
 
     if(dialog.exec() == QDialog::Accepted)
     {
-        qDebug() << "add order accepted!";
-        m_tableWidget->clear();
-        m_tableWidget->setDataTypeFinancialInfo();
+        //qDebug() << "add order accepted!";
 
         FinancialRecordInfo info = dialog.getFinancialRecordInfo();
 
@@ -101,9 +99,16 @@ bool MainWindow::addNewFinancialRecord(const QString& customerName, const QStrin
         if (true == m_sqlDatabase->insertFinacialInfo(info))
         {
             ret = true;
-            m_tableWidget->addFinancialInfo(info);
-            //QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"收支记录添加成功，具体内容显示在表格中！")).arg(info.contractID), QString(tr("确定")));
-            QString okStr = QString(tr("订单\"%1\"收支记录添加成功，具体内容显示在表格中！")).arg(info.contractID);
+            if (true == flag)
+            {
+                m_tableWidget->clear();
+                m_tableWidget->setDataTypeFinancialInfo();
+
+                m_tableWidget->addFinancialInfo(info);
+                //QMessageBox::information(this, QString(tr("提示")), QString(tr("订单\"%1\"收支记录添加成功，具体内容显示在表格中！")).arg(info.contractID), QString(tr("确定")));
+            }
+
+            QString okStr = QString(tr("订单\"%1\"收支记录添加成功！")).arg(info.contractID);
             setStatusText(okStr);
         }
         else
@@ -185,6 +190,34 @@ void MainWindow::searchFinancialRecord(int type, const QString& keyword, bool sh
     }
 }
 
+double MainWindow::getRealIncome(const QString& contractID)
+{
+    if (contractID.isEmpty())
+    {
+        qDebug() << "MainWindow::getRealIncome " << "contractID is empty!";
+        return -1;
+    }
+
+    SqlDatabase sql("record");
+    QList<FinancialRecordInfo> list;
+    if (false == sql.getFinacialInfoByContractID(contractID, list))
+    {
+        qDebug() << "MainWindow::getRealIncome " << "获取收支记录失败！";
+        return -1;
+    }
+
+    double realIncome = 0;
+    for (int i=0; i<list.size(); i++)
+    {
+        if (tr("收入") == list[i].type)
+        {
+            realIncome += list[i].amount;
+        }
+    }
+
+    return realIncome;
+}
+
 void MainWindow::connectSlots()
 {
     connect(m_addCustomerBtn, SIGNAL(clicked(bool)), this, SLOT(onAddCustomerBtn()));
@@ -193,7 +226,7 @@ void MainWindow::connectSlots()
     connect(m_addOrderBtn, SIGNAL(clicked(bool)), this, SLOT(onAddOrderBtn()));
     connect(m_searchOrderBtn, SIGNAL(clicked(bool)), this, SLOT(onSearchOrderBtn()));
 
-    connect(m_addFinancialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onAddFinancialRecord()));
+    connect(m_addFinancialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onAddFinancialRecordBtn()));
     connect(m_searchFinancialRecordBtn, SIGNAL(clicked(bool)), this, SLOT(onSearchFinancialRecordBtn()));
     connect(m_tableWidget, SIGNAL(sigNewFinancialRecord(QString,QString)), this, SLOT(onAddFinancialRecord(QString,QString)));
     connect(m_tableWidget, SIGNAL(sigSearchFinancialByCustomerName(QString)), this, SLOT(onSearchFinancialByCustomerName(QString)));
@@ -395,6 +428,11 @@ void MainWindow::onSearchOrderBtn()
             for (int i=0; i<list.size(); i++)
             {
                 list[i].calProfitIncomeAndExpenses();
+                double realIncome = getRealIncome(list[i].contractID);
+                if (realIncome > 0)
+                {
+                    list[i].realIncome = realIncome;
+                }
                 m_tableWidget->addOrderInformation(list[i]);
             }
             //qDebug() << OrderInformation::totalProfitSum << OrderInformation::partnerProfitSum;
@@ -418,7 +456,12 @@ void MainWindow::onSearchOrderBtn()
 
 void MainWindow::onAddFinancialRecord(const QString& name, const QString& contractID)
 {
-    addNewFinancialRecord(name, contractID);
+    addNewFinancialRecord(name, contractID, false);
+}
+
+void MainWindow::onAddFinancialRecordBtn()
+{
+    addNewFinancialRecord("", "", true);
 }
 
 void MainWindow::onSearchFinancialRecordBtn()
@@ -550,6 +593,8 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
     OrderDialog dialog;
     dialog.setWindowTitle(tr("编辑订单"));
     dialog.setOrderInfo(list[0]);
+
+    connect(&dialog, SIGNAL(sigAddFinancialRecord(QString,QString)), this, SLOT(onAddFinancialRecord(QString,QString)));
 
     if(dialog.exec() == QDialog::Accepted)
     {
