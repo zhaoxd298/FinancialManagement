@@ -132,7 +132,6 @@ void MainWindow::searchFinancialRecord(int type, const QString& keyword, bool sh
     bool ret = false;
     QList<FinancialRecordInfo> list;
 
-
     switch (type)
     {
     case SearchFinancialRecordDialog::SearchByCustomerName:
@@ -159,6 +158,9 @@ void MainWindow::searchFinancialRecord(int type, const QString& keyword, bool sh
             {
                 m_tableWidgetDialog->getTableWidget()->addFinancialInfo(list[i]);
             }
+
+            m_tableWidgetDialog->getTableWidget()->addFinancialStatistics();
+
             m_tableWidgetDialog->setStatusText(okStr);
             m_tableWidgetDialog->exec();
         }
@@ -427,12 +429,12 @@ void MainWindow::onSearchOrderBtn()
         {
             for (int i=0; i<list.size(); i++)
             {
-                list[i].calProfitIncomeAndExpenses();
                 double realIncome = getRealIncome(list[i].contractID);
                 if (realIncome > 0)
                 {
                     list[i].realIncome = realIncome;
                 }
+                list[i].calProfitIncomeAndExpenses();
                 m_tableWidget->addOrderInformation(list[i]);
             }
             //qDebug() << OrderInformation::totalProfitSum << OrderInformation::partnerProfitSum;

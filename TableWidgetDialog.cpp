@@ -39,7 +39,7 @@ void TableWidgetDialog::constructUI()
     mainLayout->addSpacing(20);
     mainLayout->addLayout(okBtnLayout);
 
-    setMinimumSize(800, 400);
+    setMinimumSize(850, 600);
 }
 
 void TableWidgetDialog::connectSlots()

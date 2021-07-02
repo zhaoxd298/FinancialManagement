@@ -199,10 +199,13 @@ void TableWidget::setDataTypeFinancialInfo()
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
 
-    for (int i=0; i<m_header.size(); i++)
-    {
-        setColumnWidth(i, 80);
-    }
+    setColumnWidth(0, 80);
+    setColumnWidth(1, 80);
+    setColumnWidth(2, 80);
+    setColumnWidth(3, 80);
+    setColumnWidth(4, 120);
+    setColumnWidth(5, 120);
+    setColumnWidth(6, 120);
 
     if (NULL != mainMenu)
     {
