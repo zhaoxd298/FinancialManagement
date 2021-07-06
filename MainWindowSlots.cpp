@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "CustomerInfoDialog.h"
-#include "customerinformation.h"
+#include "CustomerInformation.h"
 #include "SearchCustomerDialog.h"
 #include "OrderDialog.h"
 #include "SearchOrderDialog.h"
@@ -48,7 +48,8 @@ bool MainWindow::addNewOrder(const QString& customerName)
             else
             {
                 ret = false;
-                QMessageBox::critical(this, QString(tr("错误")), QString(tr("客户\"%1\"订单添加失败！:%2")).arg(orderList[i].customerName).arg(m_sqlDatabase->getErrorStr()), QString(tr("确定")));
+                QString errStr = QString(tr("客户\"%1\"订单添加失败！:%2")).arg(orderList[i].customerName, m_sqlDatabase->getErrorStr());
+                QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
             }
         }
     }
@@ -60,7 +61,6 @@ bool MainWindow::addNewOrder(const QString& customerName)
 
     return ret;
 }
-
 
 bool MainWindow::addNewFinancialRecord(const QString& customerName, const QString& contractID, bool flag)
 {
@@ -114,7 +114,7 @@ bool MainWindow::addNewFinancialRecord(const QString& customerName, const QStrin
         else
         {
             ret = false;
-            QString errStr = QString(tr("订单\"%1\"收支记录添加失败！:%2")).arg(info.contractID).arg(m_sqlDatabase->getErrorStr());
+            QString errStr = QString(tr("订单\"%1\"收支记录添加失败！:%2")).arg(info.contractID, m_sqlDatabase->getErrorStr());
             QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
         }
     }
@@ -263,7 +263,8 @@ void MainWindow::onAddCustomerBtn()
             // 插入前要先判断当前客户是否存在，若存在要提示
             if (m_sqlDatabase->customerInfoIsExist(customerInfoList[i].name))
             {
-                QMessageBox::critical(this, QString(tr("错误")), QString(tr("数据库中已经存在客户\"%1\"的信息！")).arg(customerInfoList[i].name), QString(tr("确定")));
+                QString errStr = QString(tr("数据库中已经存在客户\"%1\"的信息！")).arg(customerInfoList[i].name);
+                QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
                 continue;
             }
 
@@ -276,7 +277,7 @@ void MainWindow::onAddCustomerBtn()
             }
             else
             {
-                QString errStr = QString(tr("客户\"%1\"信息添加失败！:%2")).arg(customerInfoList[i].name).arg(m_sqlDatabase->getErrorStr());
+                QString errStr = QString(tr("客户\"%1\"信息添加失败！:%2")).arg(customerInfoList[i].name, m_sqlDatabase->getErrorStr());
                 QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
             }
         }
@@ -496,7 +497,8 @@ void MainWindow::onEditFinancialInfo(int row, int number, TableWidget* tableWidg
 
     if (false == m_sqlDatabase->getFinacialInfoByNumber(number, list))
     {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("从数据库中读取记录\"%1\"失败！")).arg(number), QString(tr("确定")));
+        QString errStr = QString(tr("从数据库中读取记录\"%1\"失败！")).arg(number);
+        QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
         return;
     }
 
@@ -520,7 +522,7 @@ void MainWindow::onEditFinancialInfo(int row, int number, TableWidget* tableWidg
         }
         else
         {
-            QString errStr = QString(tr("订单\"%1\"收支记录更新失败:%2")).arg(info.contractID).arg(m_sqlDatabase->getErrorStr());
+            QString errStr = QString(tr("订单\"%1\"收支记录更新失败:%2")).arg(info.contractID, m_sqlDatabase->getErrorStr());
             QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
         }
     }
@@ -615,7 +617,7 @@ void MainWindow::onEditOrderInfo(int row, const QString& orderID)
             }
             else
             {
-                QString errStr = QString(tr("客户\"%1\"订单更新失败！:%2")).arg(orderList[i].customerName).arg(m_sqlDatabase->getErrorStr());
+                QString errStr = QString(tr("客户\"%1\"订单更新失败！:%2")).arg(orderList[i].customerName, m_sqlDatabase->getErrorStr());
                 QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
             }
         }

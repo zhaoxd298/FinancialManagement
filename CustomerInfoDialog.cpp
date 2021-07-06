@@ -111,7 +111,9 @@ void CustomerInfoDialog::constructUI()
     layout->addWidget(m_cancelBtn, 15, 5, 1, 1);
 
     setWindowTitle(tr("新增客户"));
-    this->resize(420, 280);
+
+    setMinimumWidth(800);
+    //this->resize(420, 280);
     //this->setFixedWidth(320);
     //this->setFixedHeight(280);
 }

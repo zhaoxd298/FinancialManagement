@@ -18,20 +18,16 @@ SearchOrderDialog::SearchOrderDialog(QWidget *parent)
 void SearchOrderDialog::constructUI()
 {
     QLabel* searchTypeLabel = new QLabel(tr("查找方式："));
-    searchTypeLabel->setFixedWidth(60);
+    //searchTypeLabel->setFixedWidth(60);
     //searchTypeLabel->setSizePolicy(QSizePolicy::Fixed);
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
     QStringList items;
-#if defined(EXSUN_LIGHTING_FINANCIAL)
-    items << "所有订单" << "未结算利润订单" << "已结算利润订单" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
-#elif defined(REVI_FINANCIAL)
     items << "所有订单" << "待发货" << "已发货" << "上一月订单" << "指定日期" << "按业务员" << "按合同编号" << "按客户名";
-#endif
     m_searchTypeCBox->addItems(items);
 
     m_kerWordLabel = new QLabel(tr("关键字："));
-    m_kerWordLabel->setFixedWidth(60);
+    //m_kerWordLabel->setFixedWidth(60);
     m_keyWordEdit = new QLineEdit;
 
     m_dateRangeLabel = new QLabel(tr("日期范围："));
@@ -61,8 +57,8 @@ void SearchOrderDialog::constructUI()
 
     setWindowTitle(tr("查找订单"));
 
-    this->setFixedWidth(400);
-    this->setFixedHeight(150);
+    this->setFixedWidth(600);
+    this->setFixedHeight(200);
 }
 
 void SearchOrderDialog::connectSlots()

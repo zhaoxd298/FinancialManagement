@@ -167,10 +167,12 @@ void TableWidget::setDataTypeProductInfo()
     setColumnCount(m_header.size());
     setHorizontalHeaderLabels(m_header);
 
-    for (int i=0; i<m_header.size(); i++)
-    {
-        setColumnWidth(i, 80);
-    }
+    setColumnWidth(0, 150);
+    setColumnWidth(1, 80);
+    setColumnWidth(2, 80);
+    setColumnWidth(3, 80);
+    setColumnWidth(4, 150);
+    setColumnWidth(5, 120);
 
     if (NULL != mainMenu)
     {
@@ -1204,7 +1206,8 @@ void TableWidget::deleteCustomerInfo()
         }
         else
         {
-            QMessageBox::critical(this, QString(tr("错误")), QString(tr("删除客户\"%1\"信息失败:%2")).arg(name).arg(sql.getErrorStr()), QString(tr("确定")));
+            QString errStr = QString(tr("删除客户\"%1\"信息失败:%2")).arg(name, sql.getErrorStr());
+            QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
         }
     }
 }
@@ -1235,7 +1238,8 @@ void TableWidget::deleteOrderInfo()
         }
         else
         {
-            QMessageBox::critical(this, QString(tr("错误")), QString(tr("订单\"%1\"删除失败:%2")).arg(contractID).arg(sql.getErrorStr()), QString(tr("确定")));
+            QString errStr = QString(tr("订单\"%1\"删除失败:%2")).arg(contractID, sql.getErrorStr());
+            QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
         }
     }
 }
@@ -1251,7 +1255,8 @@ void TableWidget::deleteProductInfo()
     SqlDatabase sql("delete");
     if (false == sql.deleteProductInfo(number))
     {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("产品\"%1\"删除失败:%2")).arg(name).arg(sql.getErrorStr()), QString(tr("确定")));
+        QString errStr = QString(tr("产品\"%1\"删除失败:%2")).arg(name, sql.getErrorStr());
+        QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
     }
 
     removeRow(row);
@@ -1262,12 +1267,11 @@ void TableWidget::deleteFinancialInfo()
     int row = currentRow();
     int number = itemData(row, 0);
 
-    qDebug() << number;
-
     SqlDatabase sql("delete");
     if (false == sql.deleteFinacialInfo(number))
     {
-        QMessageBox::critical(this, QString(tr("错误")), QString(tr("收支记录\"%1\"删除失败:%2")).arg(number).arg(sql.getErrorStr()), QString(tr("确定")));
+        QString errStr = QString(tr("收支记录\"%1\"删除失败:%2")).arg(number).arg(sql.getErrorStr());
+        QMessageBox::critical(this, QString(tr("错误")), errStr, QString(tr("确定")));
     }
 
     removeRow(row);

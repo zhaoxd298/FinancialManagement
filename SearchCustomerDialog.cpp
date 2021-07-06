@@ -15,7 +15,7 @@ SearchCustomerDialog::SearchCustomerDialog(QWidget *parent)
 void SearchCustomerDialog::constructUI()
 {
     QLabel* searchTypeLabel = new QLabel(tr("查找方式："));
-    searchTypeLabel->setFixedWidth(60);
+    //searchTypeLabel->setFixedWidth(60);
     //searchTypeLabel->setSizePolicy(QSizePolicy::Fixed);
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
@@ -25,7 +25,7 @@ void SearchCustomerDialog::constructUI()
     m_searchTypeCBox->addItems(items);
 
     QLabel* kerWordLabel = new QLabel(tr("关键字："));
-    kerWordLabel->setFixedWidth(60);
+    //kerWordLabel->setFixedWidth(60);
     m_keyWordEdit = new QLineEdit;
 
 
@@ -36,9 +36,9 @@ void SearchCustomerDialog::constructUI()
 
     m_gridLayout = new QGridLayout;
     m_gridLayout->addWidget(searchTypeLabel, 0, 0, 1, 1);
-    m_gridLayout->addWidget(m_searchTypeCBox, 0, 1, 1, 2);
+    m_gridLayout->addWidget(m_searchTypeCBox, 0, 1, 1, 5);
     m_gridLayout->addWidget(kerWordLabel, 1, 0, 1, 1);
-    m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 2);
+    m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
 
     m_okBtn = new QPushButton(tr("确认"));
     QHBoxLayout* onBtnHLayout = new QHBoxLayout;
@@ -54,8 +54,8 @@ void SearchCustomerDialog::constructUI()
 
     setWindowTitle(tr("查找客户"));
 
-    this->setFixedWidth(400);
-    this->setFixedHeight(150);
+    this->setFixedWidth(600);
+    this->setFixedHeight(200);
 }
 
 void SearchCustomerDialog::connectSlots()
@@ -112,12 +112,12 @@ void SearchCustomerDialog::onCbxIndexChanged(int index)
 
     if (SearchByStatus == index)
     {
-        m_gridLayout->addWidget(m_statusCBox, 1, 1, 1, 2);
+        m_gridLayout->addWidget(m_statusCBox, 1, 1, 1, 5);
     }
     else
     {
 
-        m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 2);
+        m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 5);
         m_keyWordEdit->setFocus();
     }
 

@@ -28,17 +28,17 @@ void OrderDialog::constructUI()
     QDateTime dateTime(QDateTime::currentDateTime());
     m_orderIDEdit->setText(dateTime.toString("yyyyMMddhhmmsszzz"));
     m_gridLayout->addWidget(orderIDLabel, 0, 0, 1, 1);
-    m_gridLayout->addWidget(m_orderIDEdit, 0, 1, 1, 3);
+    m_gridLayout->addWidget(m_orderIDEdit, 0, 1, 1, 4);
 
     QLabel* contractIDLabel = new QLabel(tr("合同编号："));
     m_contractIDEdit = new QLineEdit;
     m_gridLayout->addWidget(contractIDLabel, 1, 0, 1, 1);
-    m_gridLayout->addWidget(m_contractIDEdit, 1, 1, 1, 3);
+    m_gridLayout->addWidget(m_contractIDEdit, 1, 1, 1, 4);
 
     QLabel* customerNameLabel = new QLabel(tr("客户："));
     m_customerNameEdit = new QLineEdit;
     m_gridLayout->addWidget(customerNameLabel, 2, 0, 1, 1);
-    m_gridLayout->addWidget(m_customerNameEdit, 2, 1, 1, 3);
+    m_gridLayout->addWidget(m_customerNameEdit, 2, 1, 1, 4);
 
     QLabel* orderStatusLabel = new QLabel(tr("订单状态："));
     m_orderStatusCbx = new QComboBox;
@@ -46,7 +46,7 @@ void OrderDialog::constructUI()
     items << "已付定金" << "已付全款" << "待发货" << "已发货" << "未结算利润" << "已结算利润";
     m_orderStatusCbx->addItems(items);
     m_gridLayout->addWidget(orderStatusLabel, 3, 0, 1, 1);
-    m_gridLayout->addWidget(m_orderStatusCbx, 3, 1, 1, 3);
+    m_gridLayout->addWidget(m_orderStatusCbx, 3, 1, 1, 4);
 
 #if 0
     QLabel* payTimeLabel = new QLabel(tr("付款时间："));
@@ -78,56 +78,57 @@ void OrderDialog::constructUI()
     QLabel* realIncomeLabel = new QLabel(tr("实收(RMB)："));
     m_realIncomeEdit = new QLineEdit;
     m_realIncomeEdit->setText("0");
+    m_realIncomeEdit->setEnabled(false);
     m_gridLayout->addWidget(realIncomeLabel, 6, 0, 1, 1);
-    m_gridLayout->addWidget(m_realIncomeEdit, 6, 1, 1, 3);
+    m_gridLayout->addWidget(m_realIncomeEdit, 6, 1, 1, 4);
 
     m_financialRecordBtn = new QPushButton(tr("新增收支记录"));
-    m_gridLayout->addWidget(m_financialRecordBtn, 6, 4, 1, 1);
+    m_gridLayout->addWidget(m_financialRecordBtn, 6, 5, 1, 1);
 
-    QLabel* freightCustomerLabel = new QLabel(tr("运费(客户)(RMB)："));
+    QLabel* freightCustomerLabel = new QLabel(tr("运费(应收客户)(RMB)："));
     m_freightCustomerEdit = new QLineEdit;
     m_freightCustomerEdit->setText("0");
     m_gridLayout->addWidget(freightCustomerLabel, 7, 0, 1, 1);
-    m_gridLayout->addWidget(m_freightCustomerEdit, 7, 1, 1, 3);
+    m_gridLayout->addWidget(m_freightCustomerEdit, 7, 1, 1, 4);
 
     QLabel* freightFactoryToUsLabel = new QLabel(tr("运费(工厂→我司)(RMB)："));
     m_freightFactoryToUsEdit = new QLineEdit;
     m_freightFactoryToUsEdit->setText("0");
     m_gridLayout->addWidget(freightFactoryToUsLabel, 8, 0, 1, 1);
-    m_gridLayout->addWidget(m_freightFactoryToUsEdit, 8, 1, 1, 3);
+    m_gridLayout->addWidget(m_freightFactoryToUsEdit, 8, 1, 1, 4);
 
     QLabel* freightUsToForwardingLabel = new QLabel(tr("运费(我司→货代)(RMB)："));
     m_freightUsToForwardingEdit = new QLineEdit;
     m_freightUsToForwardingEdit->setText("0");
     m_gridLayout->addWidget(freightUsToForwardingLabel, 9, 0, 1, 1);
-    m_gridLayout->addWidget(m_freightUsToForwardingEdit, 9, 1, 1, 3);
+    m_gridLayout->addWidget(m_freightUsToForwardingEdit, 9, 1, 1, 4);
 
     QLabel* freightForeignLabel = new QLabel(tr("运费(国外)(RMB)："));
     m_freightForeignEdit = new QLineEdit;
     m_freightForeignEdit->setText("0");
     m_gridLayout->addWidget(freightForeignLabel, 10, 0, 1, 1);
-    m_gridLayout->addWidget(m_freightForeignEdit, 10, 1, 1, 3);
+    m_gridLayout->addWidget(m_freightForeignEdit, 10, 1, 1, 4);
 
     QLabel* exchangeRateLabel = new QLabel(tr("汇率："));
     m_exchangeRateEdit = new QLineEdit;
     m_exchangeRateEdit->setText("0");
     m_gridLayout->addWidget(exchangeRateLabel, 11, 0, 1, 1);
-    m_gridLayout->addWidget(m_exchangeRateEdit, 11, 1, 1, 3);
+    m_gridLayout->addWidget(m_exchangeRateEdit, 11, 1, 1, 4);
 
 
     QLabel* handlingFeeLabel = new QLabel(tr("平台手续费(2.17%)(RMB)："));
     m_handlingFeeEdit = new QLineEdit;
     m_handlingFeeEdit->setText("0");
     m_gridLayout->addWidget(handlingFeeLabel, 12, 0, 1, 1);
-    m_gridLayout->addWidget(m_handlingFeeEdit, 12, 1, 1, 3);
+    m_gridLayout->addWidget(m_handlingFeeEdit, 12, 1, 1, 4);
 
     m_calHandlingFeeBtn = new QPushButton(tr("自动计算"));
-    m_gridLayout->addWidget(m_calHandlingFeeBtn, 12, 4, 1, 1);
+    m_gridLayout->addWidget(m_calHandlingFeeBtn, 12, 5, 1, 1);
 
     QLabel* remarksLabel = new QLabel(tr("备注："));
     m_remarksEdit = new QLineEdit;
     m_gridLayout->addWidget(remarksLabel, 13, 0, 1, 1);
-    m_gridLayout->addWidget(m_remarksEdit, 13, 1, 1, 3);
+    m_gridLayout->addWidget(m_remarksEdit, 13, 1, 1, 4);
 
     m_productTableWidget = new TableWidget;
     m_productTableWidget->setDataTypeProductInfo();
@@ -140,7 +141,7 @@ void OrderDialog::constructUI()
     m_gridLayout->addWidget(m_cancelBtn, 15, 5, 1, 1);
 
     setWindowTitle(tr("新增订单"));
-    this->setMinimumWidth(550);
+    this->setMinimumWidth(800);
     //this->setFixedHeight(280);
 }
 
@@ -195,6 +196,10 @@ void OrderDialog::setOrderInfo(const OrderInformation& orderInfo)
 #endif
 
     m_realIncomeEdit->setText(QString::number(orderInfo.realIncome));
+    if (orderInfo.realIncome > 0)
+    {
+        m_realIncomeEdit->setEnabled(true);
+    }
     m_handlingFeeEdit->setText(QString::number(orderInfo.handlingFee));
     m_freightCustomerEdit->setText(QString::number(orderInfo.freightCustomer));
     m_freightFactoryToUsEdit->setText(QString::number(orderInfo.freightFactoryToUs));

@@ -42,7 +42,7 @@ void SearchFinancialRecordDialog::onOkBtn()
 void SearchFinancialRecordDialog::constructUI()
 {
     QLabel* searchTypeLabel = new QLabel(tr("查找方式："));
-    searchTypeLabel->setFixedWidth(60);
+    //searchTypeLabel->setFixedWidth(60);
     //searchTypeLabel->setSizePolicy(QSizePolicy::Fixed);
     m_searchTypeCBox = new QComboBox;
     //m_searchTypeCBox->setSizePolicy(QSizePolicy::Expanding);
@@ -52,14 +52,14 @@ void SearchFinancialRecordDialog::constructUI()
     m_searchTypeCBox->addItems(items);
 
     QLabel* kerWordLabel = new QLabel(tr("关键字："));
-    kerWordLabel->setFixedWidth(60);
+    //kerWordLabel->setFixedWidth(60);
     m_keyWordEdit = new QLineEdit;
 
     m_gridLayout = new QGridLayout;
     m_gridLayout->addWidget(searchTypeLabel, 0, 0, 1, 1);
-    m_gridLayout->addWidget(m_searchTypeCBox, 0, 1, 1, 2);
+    m_gridLayout->addWidget(m_searchTypeCBox, 0, 1, 1, 4);
     m_gridLayout->addWidget(kerWordLabel, 1, 0, 1, 1);
-    m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 2);
+    m_gridLayout->addWidget(m_keyWordEdit, 1, 1, 1, 4);
 
     m_okBtn = new QPushButton(tr("确认"));
     QHBoxLayout* onBtnHLayout = new QHBoxLayout;
@@ -75,8 +75,8 @@ void SearchFinancialRecordDialog::constructUI()
 
     setWindowTitle(tr("查找记录"));
 
-    this->setFixedWidth(400);
-    this->setFixedHeight(150);
+    this->setFixedWidth(600);
+    this->setFixedHeight(200);
 }
 
 void SearchFinancialRecordDialog::connectSlots()
