@@ -112,7 +112,7 @@ void CustomerInfoDialog::constructUI()
 
     setWindowTitle(tr("新增客户"));
 
-    setMinimumWidth(800);
+    setMinimumWidth(600);
     //this->resize(420, 280);
     //this->setFixedWidth(320);
     //this->setFixedHeight(280);

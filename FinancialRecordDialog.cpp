@@ -127,8 +127,8 @@ void FinancialRecordDialog::constructUI()
     m_gridLayout->addWidget(m_cancelBtn, 12, 5, 1, 1);
 
     setWindowTitle(tr("新增记录"));
-    this->setMinimumWidth(900);
-    this->setMinimumHeight(250);
+    this->setMinimumWidth(600);
+    //this->setMinimumHeight(250);
 }
 
 void FinancialRecordDialog::onOKBtn()

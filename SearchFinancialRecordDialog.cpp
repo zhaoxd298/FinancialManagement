@@ -75,8 +75,8 @@ void SearchFinancialRecordDialog::constructUI()
 
     setWindowTitle(tr("查找记录"));
 
-    this->setFixedWidth(600);
-    this->setFixedHeight(200);
+    this->setFixedWidth(500);
+    this->setFixedHeight(150);
 }
 
 void SearchFinancialRecordDialog::connectSlots()

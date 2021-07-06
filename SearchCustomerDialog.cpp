@@ -54,8 +54,8 @@ void SearchCustomerDialog::constructUI()
 
     setWindowTitle(tr("查找客户"));
 
-    this->setFixedWidth(600);
-    this->setFixedHeight(200);
+    this->setFixedWidth(500);
+    this->setFixedHeight(150);
 }
 
 void SearchCustomerDialog::connectSlots()
