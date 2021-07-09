@@ -640,6 +640,12 @@ void MainWindow::onSearchHistoryOrder(const QString &name)      // 查找历史�
 
         for (int i=0; i<list.size(); i++)
         {
+            double realIncome = getRealIncome(list[i].contractID);
+            if (realIncome > 0)
+            {
+                list[i].realIncome = realIncome;
+            }
+
             list[i].calProfitIncomeAndExpenses();
             m_tableWidget->addOrderInformation(list[i]);
             //qDebug() << list[i].shouldIncome;
