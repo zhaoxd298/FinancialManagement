@@ -234,16 +234,19 @@ void MainWindow::connectSlots()
     connect(m_tableWidget, SIGNAL(sigSearchFinancialByCustomerName(QString)), this, SLOT(onSearchFinancialByCustomerName(QString)));
     connect(m_tableWidget, SIGNAL(sigSearchFinancialByContractID(QString)), this, SLOT(onSearchFinancialBycontractID(QString)));
 
-    connect(m_tableWidget, SIGNAL(sigEditCustomerInfo(int, QString)), this, SLOT(onEditCustomerInfo(int, QString)));
-    connect(m_tableWidget, SIGNAL(sigEditOrderInfo(int, QString)), this, SLOT(onEditOrderInfo(int, QString)));
+    connect(m_tableWidget, SIGNAL(sigEditCustomerInfo(int,QString)), this, SLOT(onEditCustomerInfo(int,QString)));
+    connect(m_tableWidget, SIGNAL(sigEditOrderInfo(int,QString)), this, SLOT(onEditOrderInfo(int,QString)));
     connect(m_tableWidget, SIGNAL(sigEditFinancialInfo(int,int,TableWidget*)), this, SLOT(onEditFinancialInfo(int,int,TableWidget*)));
 
     connect(m_tableWidgetDialog->getTableWidget(), SIGNAL(sigEditFinancialInfo(int,int,TableWidget*)), this, SLOT(onEditFinancialInfo(int,int,TableWidget*)));
+    connect(m_tableWidgetDialog->getTableWidget(), SIGNAL(sigNewFinancialRecord(QString,QString)), this, SLOT(onAddFinancialRecord(QString,QString)));
+    connect(m_tableWidgetDialog->getTableWidget(), SIGNAL(sigSearchFinancialByCustomerName(QString)), this, SLOT(onSearchFinancialByCustomerName(QString)));
+    connect(m_tableWidgetDialog->getTableWidget(), SIGNAL(sigSearchFinancialByContractID(QString)), this, SLOT(onSearchFinancialBycontractID(QString)));
 
     connect(m_tableWidget, SIGNAL(sigNewOrder(QString)), this, SLOT(onNewOrder(QString)));
     connect(m_tableWidget, SIGNAL(sigSearchHistoryOrder(QString)), this, SLOT(onSearchHistoryOrder(QString)));
 
-    connect(m_tableWidget, SIGNAL(sigChangeOrderStatus(QStringList, QString)), this, SLOT(onChangeOrderStatus(QStringList, QString)));
+    connect(m_tableWidget, SIGNAL(sigChangeOrderStatus(QStringList,QString)), this, SLOT(onChangeOrderStatus(QStringList,QString)));
 }
 
 void MainWindow::onAddCustomerBtn()

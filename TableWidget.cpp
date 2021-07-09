@@ -187,7 +187,7 @@ void TableWidget::setDataTypeProductInfo()
     }
 
     //setEditTriggers(QAbstractItemView::AllEditTriggers);
-    setEditTriggers(QAbstractItemView::AnyKeyPressed | QAbstractItemView::DoubleClicked);
+    setEditTriggers(QAbstractItemView::AnyKeyPressed | QAbstractItemView::DoubleClicked );
 }
 
 
